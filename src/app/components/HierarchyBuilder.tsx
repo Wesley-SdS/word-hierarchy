@@ -1,7 +1,8 @@
-// app/components/HierarchyBuilder.tsx
+
 'use client';
 
 import { useState } from 'react';
+import { FaEdit, FaTrash, FaPlus, FaEllipsisV } from 'react-icons/fa';
 
 interface WordNode {
     name: string;
@@ -14,6 +15,8 @@ const HierarchyBuilder = () => {
     const [selectedParent, setSelectedParent] = useState<WordNode | null>(null);
     const [editWord, setEditWord] = useState<string | null>(null);
     const [isEditingNode, setIsEditingNode] = useState<WordNode | null>(null);
+    const [dropdownVisible, setDropdownVisible] = useState<WordNode | null>(null);
+    const [dropdownTimeout, setDropdownTimeout] = useState<NodeJS.Timeout | null>(null);
 
     const addWord = () => {
         if (newWord.trim() === '') return;
@@ -112,18 +115,18 @@ const HierarchyBuilder = () => {
         });
     };
 
-    const renderHierarchy = (nodes: WordNode[], parentNode: WordNode | null = null, level = 0) => {
+    const renderHierarchy = (nodes: WordNode[], parentNode: WordNode | null = null) => {
         return (
-            <ul className="list-disc pl-5">
+            <ul className="list-disc pl-5 mb-4">
                 {nodes.map((node, index) => (
-                    <li key={index} className="mb-2">
+                    <li key={index} className="mb-2 border-b pb-2">
                         {isEditingNode === node ? (
                             <>
                                 <input
                                     type="text"
                                     value={editWord || ''}
                                     onChange={(e) => setEditWord(e.target.value)}
-                                    onBlur={saveEdit} // Salva automaticamente quando o campo perde o foco
+                                    onBlur={saveEdit} 
                                     className="border rounded px-2 py-1"
                                 />
                                 <button onClick={saveEdit} className="bg-blue-500 text-white rounded px-2 py-1 ml-2">
@@ -131,22 +134,49 @@ const HierarchyBuilder = () => {
                                 </button>
                             </>
                         ) : (
-                            <>
+                            <div className="flex items-center justify-between">
                                 <span
                                     onClick={() => setSelectedParent(node)}
                                     className={`cursor-pointer ${selectedParent?.name === node.name ? 'font-bold' : 'normal'}`}
                                 >
                                     {node.name}
                                 </span>
-                                <button onClick={() => editNode(node)} className="bg-yellow-500 text-white rounded px-2 py-1 ml-2">
-                                    Edit
-                                </button>
-                                <button onClick={() => removeWord(node, parentNode)} className="bg-red-500 text-white rounded px-2 py-1 ml-2">
-                                    Remove
-                                </button>
-                            </>
+                                <div
+                                    className="relative"
+                                    onMouseEnter={() => {
+                                        clearTimeout(dropdownTimeout!); 
+                                        setDropdownVisible(node);
+                                    }}
+                                    onMouseLeave={() => {
+                                        const timeout = setTimeout(() => {
+                                            setDropdownVisible(null);
+                                        }, 200); // 200ms de delay
+                                        setDropdownTimeout(timeout);
+                                    }}
+                                >
+                                    <button className="focus:outline-none">
+                                        <FaEllipsisV className="text-gray-500" />
+                                    </button>
+                                    {dropdownVisible === node && (
+                                        <div className="absolute right-0 mt-1 w-40 bg-white rounded-md shadow-lg z-10">
+                                            <button
+                                                onClick={() => editNode(node)}
+                                                className="flex items-center px-4 py-2 text-yellow-700 hover:bg-yellow-100 w-full text-left"
+                                            >
+                                                <FaEdit className="mr-2" /> Edit
+                                            </button>
+                                            <button
+                                                onClick={() => removeWord(node, parentNode)}
+                                                className="flex items-center px-4 py-2 text-red-500 hover:bg-red-100 w-full text-left"
+                                            >
+                                                <FaTrash className="mr-2" /> Remove
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         )}
-                        {renderHierarchy(node.children, node, level + 1)}
+                        {renderHierarchy(node.children, node)}
                     </li>
                 ))}
             </ul>
@@ -164,17 +194,17 @@ const HierarchyBuilder = () => {
     };
 
     return (
-        <div className="p-5">
-            <h1 className="text-2xl font-bold mb-4">Create Word Hierarchy</h1>
+        <div className="p-5 max-w-3xl mx-auto">
+            <h1 className="text-3xl font-bold mb-4">Create Word Hierarchy</h1>
             <input
                 type="text"
                 placeholder="Enter word"
                 value={newWord}
                 onChange={(e) => setNewWord(e.target.value)}
-                className="border rounded px-2 py-1 mb-4"
+                className="border rounded px-2 py-1 mb-4 w-full"
             />
-            <button onClick={addWord} className="bg-green-500 text-white rounded px-4 py-2">
-                Add Word
+            <button onClick={addWord} className="flex items-center bg-green-500 text-white rounded px-4 py-2 mb-4">
+                <FaPlus className="mr-2" /> Add Word
             </button>
 
             {selectedParent && <p className="mt-4">Selected Parent: <strong>{selectedParent.name}</strong></p>}
