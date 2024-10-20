@@ -114,9 +114,9 @@ const HierarchyBuilder = () => {
 
     const renderHierarchy = (nodes: WordNode[], parentNode: WordNode | null = null, level = 0) => {
         return (
-            <ul>
+            <ul className="list-disc pl-5">
                 {nodes.map((node, index) => (
-                    <li key={index} style={{ marginLeft: `${level * 20}px` }}>
+                    <li key={index} className="mb-2">
                         {isEditingNode === node ? (
                             <>
                                 <input
@@ -124,21 +124,24 @@ const HierarchyBuilder = () => {
                                     value={editWord || ''}
                                     onChange={(e) => setEditWord(e.target.value)}
                                     onBlur={saveEdit} // Salva automaticamente quando o campo perde o foco
+                                    className="border rounded px-2 py-1"
                                 />
-                                <button onClick={saveEdit}>Save</button>
+                                <button onClick={saveEdit} className="bg-blue-500 text-white rounded px-2 py-1 ml-2">
+                                    Save
+                                </button>
                             </>
                         ) : (
                             <>
                                 <span
                                     onClick={() => setSelectedParent(node)}
-                                    style={{ cursor: 'pointer', fontWeight: selectedParent?.name === node.name ? 'bold' : 'normal' }}
+                                    className={`cursor-pointer ${selectedParent?.name === node.name ? 'font-bold' : 'normal'}`}
                                 >
                                     {node.name}
                                 </span>
-                                <button onClick={() => editNode(node)} style={{ marginLeft: '10px', color: 'blue' }}>
+                                <button onClick={() => editNode(node)} className="bg-yellow-500 text-white rounded px-2 py-1 ml-2">
                                     Edit
                                 </button>
-                                <button onClick={() => removeWord(node, parentNode)} style={{ marginLeft: '10px', color: 'red' }}>
+                                <button onClick={() => removeWord(node, parentNode)} className="bg-red-500 text-white rounded px-2 py-1 ml-2">
                                     Remove
                                 </button>
                             </>
@@ -161,24 +164,29 @@ const HierarchyBuilder = () => {
     };
 
     return (
-        <div>
-            <h1>Create Word Hierarchy</h1>
+        <div className="p-5">
+            <h1 className="text-2xl font-bold mb-4">Create Word Hierarchy</h1>
             <input
                 type="text"
                 placeholder="Enter word"
                 value={newWord}
                 onChange={(e) => setNewWord(e.target.value)}
+                className="border rounded px-2 py-1 mb-4"
             />
-            <button onClick={addWord}>Add Word</button>
+            <button onClick={addWord} className="bg-green-500 text-white rounded px-4 py-2">
+                Add Word
+            </button>
 
-            {selectedParent && <p>Selected Parent: {selectedParent.name}</p>}
+            {selectedParent && <p className="mt-4">Selected Parent: <strong>{selectedParent.name}</strong></p>}
 
-            <div>
-                <h2>Hierarchy Preview:</h2>
+            <div className="mt-4">
+                <h2 className="text-xl font-semibold">Hierarchy Preview:</h2>
                 {renderHierarchy(hierarchy)}
             </div>
 
-            <button onClick={saveHierarchy}>Save as JSON</button>
+            <button onClick={saveHierarchy} className="bg-blue-600 text-white rounded px-4 py-2 mt-4">
+                Save as JSON
+            </button>
         </div>
     );
 };
