@@ -1,94 +1,76 @@
-import React, { useState } from 'react';
-import { FaEdit, FaTrash, FaEllipsisV } from 'react-icons/fa';
+import React from 'react';
+import { Disclosure } from '@headlessui/react';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 
 interface WordNode {
-    name: string;
-    children: WordNode[];
+  name: string;
+  children: WordNode[];
 }
 
 interface HierarchyTreeProps {
-    hierarchy: WordNode[];
-    setSelectedParent: (node: WordNode) => void;
-    editNode: (node: WordNode) => void;
-    removeWord: (node: WordNode, parentNode: WordNode | null) => void;
+  nodes: WordNode[];
+  selectedParent: WordNode | null;
+  onNodeClick: (node: WordNode) => void;
+  onEdit: (nodeToEdit: WordNode) => void;
+  onRemove: (nodeToRemove: WordNode, parentNode: WordNode | null) => void;
 }
 
 const HierarchyTree: React.FC<HierarchyTreeProps> = ({
-    hierarchy,
-    setSelectedParent,
-    editNode,
-    removeWord,
+  nodes,
+  selectedParent,
+  onNodeClick,
+  onEdit,
+  onRemove,
 }) => {
-    const [selectedParent, setSelectedParentState] = useState<WordNode | null>(null);
-    const [dropdownVisible, setDropdownVisible] = useState<WordNode | null>(null);
-    const [dropdownTimeout, setDropdownTimeout] = useState<NodeJS.Timeout | null>(null);
+  const renderNodes = (nodes: WordNode[], parent: WordNode | null = null) => {
+    return nodes.map((node, index) => (
+      <Disclosure key={index}>
+        {({ open }) => (
+          <>
+            <Disclosure.Button
+              className={`flex w-full justify-between items-center py-2 text-lg font-semibold text-gray-800 hover:bg-gray-100 cursor-pointer ${selectedParent === node ? 'bg-blue-100' : ''
+                }`}
+              onClick={() => onNodeClick(node)}
+            >
+              <div className="flex items-center w-full gap-4">
+                <span>{node.name}</span>
+                <span>{open ? '-' : '+'}</span>
+                <div className="flex space-x-2 ml-auto">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(node);
+                    }}
+                    className="text-yellow-500 hover:text-yellow-600 text-sm px-2 py-1"
+                  >
+                    <FaEdit className="inline mr-1" /> Edit
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemove(node, parent);
+                    }}
+                    className="text-red-500 hover:text-red-600 text-sm px-2 py-1"
+                  >
+                    <FaTrash className="inline mr-1" /> Remove
+                  </button>
+                </div>
+              </div>
+            </Disclosure.Button>
+            <Disclosure.Panel className="pl-4">
+              {node.children.length > 0 && (
+                <ul>
+                  {renderNodes(node.children, node)}
+                </ul>
+              )}
+            </Disclosure.Panel>
+          </>
+        )}
+      </Disclosure>
+    ));
+  };
 
-    const handleMouseEnter = (node: WordNode) => {
-        clearTimeout(dropdownTimeout!);
-        setDropdownVisible(node);
-    };
-
-    const handleMouseLeave = () => {
-        const timeout = setTimeout(() => {
-            setDropdownVisible(null);
-        }, 200); // Delay de 200ms
-        setDropdownTimeout(timeout);
-    };
-
-    const renderHierarchy = (nodes: WordNode[], parentNode: WordNode | null = null) => {
-        return (
-            <ul className="list-disc pl-5 mb-4">
-                {nodes.map((node, index) => (
-                    <li key={index} className="mb-2 border-b pb-2">
-                        <div className="flex items-center justify-between">
-                            <span
-                                onClick={() => {
-                                    setSelectedParent(node);
-                                    setSelectedParentState(node); // Atualiza o estado do parent selecionado
-                                }}
-                                className={`cursor-pointer ${selectedParent?.name === node.name ? 'font-bold' : 'normal'}`}
-                            >
-                                {node.name}
-                            </span>
-                            <div
-                                className="relative"
-                                onMouseEnter={() => handleMouseEnter(node)}
-                                onMouseLeave={handleMouseLeave}
-                            >
-                                <button className="focus:outline-none">
-                                    <FaEllipsisV className="text-gray-500" />
-                                </button>
-                                {dropdownVisible === node && (
-                                    <div className="absolute right-0 mt-1 w-40 bg-white rounded-md shadow-lg z-10">
-                                        <button
-                                            onClick={() => editNode(node)}
-                                            className="flex items-center px-4 py-2 text-yellow-700 hover:bg-yellow-100 w-full text-left"
-                                        >
-                                            <FaEdit className="mr-2" /> Edit
-                                        </button>
-                                        <button
-                                            onClick={() => removeWord(node, parentNode)}
-                                            className="flex items-center px-4 py-2 text-red-500 hover:bg-red-100 w-full text-left"
-                                        >
-                                            <FaTrash className="mr-2" /> Remove
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        {renderHierarchy(node.children, node)}
-                    </li>
-                ))}
-            </ul>
-        );
-    };
-
-    return (
-        <div className="mt-4">
-            <h2 className="text-xl font-semibold">Hierarchy Preview:</h2>
-            {renderHierarchy(hierarchy)}
-        </div>
-    );
+  return <div className="border-t border-gray-300 mt-4">{renderNodes(nodes)}</div>;
 };
 
 export default HierarchyTree;

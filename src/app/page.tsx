@@ -1,3 +1,5 @@
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; 
 import Hero from "./components/Hero";
 import HierarchyBuilder from "./components/HierarchyBuilder";
 import Footer from "./components/Footer";
@@ -12,6 +14,19 @@ export default function Home() {
       </main>
 
       <Footer />
+
+      
+      <ToastContainer
+        position="top-right" 
+        autoClose={3000} 
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 }
