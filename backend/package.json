@@ -1,0 +1,21 @@
+{
+  "name": "hierarchy-analyzer",
+  "version": "1.0.0",
+  "description": "CLI to analyze word hierarchy",
+  "main": "index.js",
+  "scripts": {
+    "analyze": "ts-node cli.ts",
+    "start": "ts-node index.ts"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "express": "^4.21.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  },
+  "devDependencies": {
+    "@types/body-parser": "^1.19.5",
+    "@types/express": "^5.0.0",
+    "@types/node": "^18.16.0"
+  }
+}
