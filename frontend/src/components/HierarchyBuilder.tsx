@@ -27,7 +27,7 @@ const HierarchyBuilder: React.FC = () => {
     const [selectedParent, setSelectedParent] = useState<WordNode | null>(null);
     const [isEditingNode, setIsEditingNode] = useState<WordNode | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [nodeToRemove, setNodeToRemove] = useState<WordNode | null>(null); 
+    const [nodeToRemove, setNodeToRemove] = useState<WordNode | null>(null);
 
     const addWord = () => {
         if (!newWord.trim()) {
@@ -99,16 +99,30 @@ const HierarchyBuilder: React.FC = () => {
         });
     };
 
+    // Função para remover um nó e seus filhos em qualquer nível da hierarquia
+    const removeNodeRecursively = (nodes: WordNode[], nodeToRemove: WordNode): WordNode[] => {
+        return nodes.filter(node => {
+            if (node === nodeToRemove) {
+                return false; // Remove o nó correspondente
+            }
+            if (node.children.length > 0) {
+                node.children = removeNodeRecursively(node.children, nodeToRemove); // Verifica recursivamente os filhos
+            }
+            return true; // Mantém o nó
+        });
+    };
+
     const confirmRemoval = () => {
         if (nodeToRemove) {
-            setHierarchy(hierarchy.filter(node => node !== nodeToRemove));
+            const updatedHierarchy = removeNodeRecursively(hierarchy, nodeToRemove);
+            setHierarchy(updatedHierarchy);
             toast.success('Word removed successfully!');
-            setNodeToRemove(null); 
+            setNodeToRemove(null);
         }
     };
 
     const handleRemoveWord = (node: WordNode) => {
-        setNodeToRemove(node); 
+        setNodeToRemove(node);
     };
 
     const editNode = (nodeToEdit: WordNode) => {
@@ -144,7 +158,7 @@ const HierarchyBuilder: React.FC = () => {
     };
 
     return (
-        <div className="p-6 max-w-3xl mx-auto">
+        <div className="p-6 w-full max-w-5xl mx-auto border-2 rounded-lg">
             <h1 className="text-3xl font-bold mb-4 text-gray-800">Create Word Hierarchy</h1>
             <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             <div className="flex mb-4">
@@ -154,8 +168,9 @@ const HierarchyBuilder: React.FC = () => {
                     value={newWord}
                     onChange={(e) => setNewWord(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && addWord()}
-                    className="border border-gray-300 rounded px-4 py-2 flex-grow mr-2"
+                    className="border border-gray-300 rounded px-4 py-2 flex-grow mr-2 bg-white text-gray-800  dark:text-gray-200 dark:border-gray-600"
                 />
+
                 <Button onClick={addWord} className="flex items-center bg-violet-600 text-white rounded px-4 py-2 hover:bg-violet-700 transition-colors">
                     {isEditingNode ? 'Save Edit' : <><FaPlus className="mr-2" /> Add</>}
                 </Button>
@@ -165,11 +180,11 @@ const HierarchyBuilder: React.FC = () => {
                 nodes={filteredHierarchy}
                 onNodeClick={handleNodeClick}
                 onEdit={editNode}
-                onRemove={handleRemoveWord} 
+                onRemove={handleRemoveWord}
                 selectedParent={selectedParent}
             />
             <SaveButton hierarchy={hierarchy} onClick={handleSaveToBackend} />
-        
+
             <Dialog open={!!nodeToRemove} onOpenChange={() => setNodeToRemove(null)}>
                 <DialogTrigger asChild>
                     <button className="hidden" />
