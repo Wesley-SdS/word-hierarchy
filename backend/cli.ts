@@ -8,43 +8,47 @@ const loadHierarchy = () => {
   return JSON.parse(data);
 };
 
-// Função para normalizar as strings (remover acentos, minúsculas, etc.)
+// Função para normalizar strings (remover acentos, minúsculas, etc.)
 const normalizeString = (str: string) => {
   return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 };
 
 // Função para analisar a frase
-const analyzePhrase = (phrase: string, depth: number, verbose: boolean) => {
+export const analyzePhrase = (phrase: string, depth: number, verbose: boolean) => {
   const hierarchy = loadHierarchy();
   const words = phrase.split(/\s+/).map(normalizeString);
   const matches: Record<string, number> = {};
+  const verifiedWords = new Set<string>(); // Para evitar contar uma palavra mais de uma vez
   const startVerifyTime = Date.now();
 
   const searchHierarchy = (node: any, currentDepth: number) => {
     if (currentDepth === depth) {
       words.forEach(word => {
-        console.log(`Verificando palavra: ${word}`); // Log para verificar a palavra
+        if (verifiedWords.has(word)) return; // Evita verificar a mesma palavra várias vezes
+
+        console.log(`Verificando palavra: ${word} no nível ${currentDepth}`);
         if (node && typeof node === 'object') {
-          // Verifica se a palavra está presente como chave no objeto
-          if (word in node) {
-            console.log(`Palavra encontrada como chave: ${word}`); // Log para chave encontrada
-            matches[word] = (matches[word] || 0) + 1;
-          }
-          // Verifica se a palavra está presente em arrays de valores
-          Object.values(node).forEach(arr => {
-            if (Array.isArray(arr)) {
-              const normalizedArray = arr.map(normalizeString);
+          Object.entries(node).forEach(([key, value]) => {
+            if (Array.isArray(value)) {
+              const normalizedArray = value.map(normalizeString);
+              console.log(`Verificando array na categoria ${key}: ${normalizedArray}`);
               if (normalizedArray.includes(word)) {
-                console.log(`Palavra encontrada em array: ${word}`); // Log para array encontrado
-                matches[word] = (matches[word] || 0) + 1;
+                console.log(`Palavra encontrada na categoria: ${key}`);
+                matches[key] = (matches[key] || 0) + 1;
+                verifiedWords.add(word); // Marca a palavra como verificada
               }
+            } else if (typeof value === 'object') {
+              console.log(`Descendo na subcategoria: ${key}`);
+              searchHierarchy(value, currentDepth); // Continua a verificação nas subcategorias
             }
           });
         }
       });
-    } else {
+    } else if (currentDepth < depth) {
       Object.keys(node).forEach(key => {
-        searchHierarchy(node[key], currentDepth + 1);
+        console.log(`Descendo na subcategoria: ${key} no nível ${currentDepth + 1}`);
+        const subNode = node[key];
+        searchHierarchy(subNode, currentDepth + 1);
       });
     }
   };
@@ -54,7 +58,7 @@ const analyzePhrase = (phrase: string, depth: number, verbose: boolean) => {
   const end = Date.now();
   const verifyEnd = Date.now();
 
-  // Exibe o resultado da análise
+  // Exibe as métricas se o verbose for habilitado
   if (verbose) {
     console.log(`Tempo de carregamento dos parâmetros: ${end - start}ms`);
     console.log(`Tempo de verificação da frase: ${verifyEnd - startVerifyTime}ms`);
@@ -63,10 +67,11 @@ const analyzePhrase = (phrase: string, depth: number, verbose: boolean) => {
   if (Object.keys(matches).length === 0) {
     console.log('0');
   } else {
-    const results = Object.entries(matches)
-      .map(([key, value]) => `${key.charAt(0).toUpperCase() + key.slice(1)} = ${value}`)
-      .join('; ');
-    console.log(results);
+    console.log(
+      Object.entries(matches)
+        .map(([key, value]) => `${key.charAt(0).toUpperCase() + key.slice(1)} = ${value}`)
+        .join('; ')
+    );
   }
 };
 
@@ -89,4 +94,7 @@ const main = () => {
   analyzePhrase(phrase, depth, verbose);
 };
 
-main();
+// Executa a função main somente se o arquivo for executado diretamente via CLI
+if (require.main === module) {
+  main();
+}
