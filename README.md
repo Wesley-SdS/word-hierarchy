@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+[Leia em Português](./README_PT.md)
 
-First, run the development server:
 
+# Word Hierarchy Analyzer (CLI and Frontend)
+
+This project consists of a command-line interface (CLI) application and a frontend to analyze a word hierarchy, where each level of the tree represents a specific depth. The goal is to allow users to analyze phrases and identify words present at a given depth in the hierarchy.
+
+## Features
+
+### CLI
+- Load a hierarchical tree of words from a JSON file.
+- Analyze user-provided phrases, identifying words matching the specified depth in the tree.
+- Display metrics such as verification and loading time.
+- Support for verbose mode to show additional information.
+
+### Frontend
+- User-friendly interface to view and interact with the word hierarchy.
+- Visual display of the hierarchy, allowing navigation between categories and subcategories.
+- Support for adding, editing, and removing words from the hierarchy.
+- Search functionality to quickly find words in the hierarchy.
+- Drag-and-drop support for reorganizing words in the hierarchical tree.
+
+## Technologies Used
+
+### Backend (CLI)
+- **Node.js**: Used as the runtime environment.
+- **TypeScript**: Development language to ensure static typing and code robustness.
+- **Jest**: Unit testing framework used to validate CLI functionality.
+- **fs** and **path**: Native Node.js modules for file and directory manipulation.
+
+### Frontend
+- **Next.js 14**: React framework used to develop the frontend.
+- **Tailwind CSS**: Used for quick and efficient UI styling.
+- **ShadCN UI**: Component library used to create dialogs and UI elements.
+- **TypeScript**: Used to ensure better quality and typing in frontend code.
+
+## Prerequisites
+
+- **Node.js** version 14 or above.
+- **npm** (Node Package Manager) or **yarn**.
+- **Git** for version control.
+
+## How to Run the Project
+
+### Backend (CLI)
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-repository.git
+   cd your-repository/backend
+   ```
+
+2. Install the dependencies with:
+Navigate to the folder `backend`:
+   ```bash
+   cd ../backend
+   ```
+   ```bash
+   npm install
+   ```
+
+3. Run the analysis command using the following syntax:
+   ```bash
+   npm run analyze -- --depth <depth-level> --phrase "<your-phrase>" --verbose
+   ```
+
+- `--depth <n>`: Specify the depth level of the hierarchy.
+- `--phrase "<your-phrase>"`: The phrase you want to analyze.
+- `--verbose` (optional): Shows performance metrics.
+
+Example:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run analyze -- --depth 3 --phrase "Eu vi tigres e papagaios" --verbose
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Running Tests
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+To run the tests, use:
+```bash
+npm run test
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Frontend
+1. Navigate to the `frontend` folder:
+   ```bash
+   cd ../frontend
+   ```
 
-## Learn More
+2. Install the dependencies with:
+   ```bash
+   npm install
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+3. Start the development server with:
+   ```bash
+   npm run dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+|-- backend
+    |-- cli.ts               # CLI logic
+    |-- dicts
+        |-- hierarchy.json   # Word hierarchy JSON file
+    |-- tests
+        |-- analyzePhrase.test.ts  # Jest unit tests
+|-- frontend
+    |-- components           # React components
+    |-- pages
+        |-- index.tsx        # Main frontend page
+    |-- styles               # Tailwind CSS styles
+```
 
-## Deploy on Vercel
+## Roadmap
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Add a feature to allow users to import/export hierarchies in different formats.
+- Improve performance for large hierarchies and complex phrases.
+- Expand the frontend with a dashboard for managing multiple hierarchies.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Contributions
+
+Contributions are welcome! Please follow these steps to contribute:
+
+1. Fork the repository.
+2. Create a new branch for your feature.
+3. Submit a pull request.
+
+## Contact
+
+If you have questions or suggestions, contact via email: [wesleysantos.0095@gmail.com](mailto:wesleysantos.0095@gmail.com).
