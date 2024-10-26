@@ -7,64 +7,88 @@ const FILE_PATH = path.join(__dirname, '../dicts', 'hierarchy.json');
 
 // Tipo para a hierarquia de palavras
 type WordHierarchy = {
-    [key: string]: WordHierarchy | string[];
+    [key: string]: WordHierarchy | string[] | { palavras: string[] };
 };
 
 // Carregar a hierarquia de palavras do JSON
 const loadWords = (): WordHierarchy => {
-    const data = fs.readFileSync(FILE_PATH, 'utf-8');
-    return JSON.parse(data);
+    try {
+        const data = fs.readFileSync(FILE_PATH, 'utf-8');
+        return JSON.parse(data);
+    } catch (error) {
+        console.error('Erro ao carregar as palavras:', error);
+        return {}; // Retorne um objeto vazio em caso de erro
+    }
 };
 
 // Salvar a hierarquia de palavras no JSON
 const saveWords = (data: WordHierarchy) => {
-    fs.writeFileSync(FILE_PATH, JSON.stringify(data, null, 2));
+    try {
+        fs.writeFileSync(FILE_PATH, JSON.stringify(data, null, 2));
+    } catch (error) {
+        console.error('Erro ao salvar as palavras:', error);
+    }
+};
+
+// Função auxiliar para navegar até a categoria correta
+const navigateToCategory = (words: WordHierarchy, categories: string[]): WordHierarchy | string[] | null => {
+    let currentLevel: WordHierarchy | string[] | null = words;
+
+    for (const category of categories) {
+        if (!currentLevel || Array.isArray(currentLevel)) {
+            return null; // Categoria não encontrada ou caminho incorreto
+        }
+        currentLevel = currentLevel[category] as WordHierarchy | string[];
+    }
+    return currentLevel;
 };
 
 // Rota para obter a hierarquia de palavras
 router.get('/', (req: Request, res: Response) => {
-    const words = loadWords();
-    res.json(words);
+    try {
+        const words = loadWords();
+        res.json(words);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to load hierarchy.' });
+    }
 });
 
-router.post('/', (req: Request, res: Response) => {
-    const { category, newWord }: { category: string; newWord: string } = req.body;
-    const words = loadWords();
-    const categories = category.split('.'); // Divide a categoria por ponto
+// Rota para adicionar uma nova palavra ou categoria
+router.post('/add', (req: Request, res: Response) => {
+    const { category, newWord } = req.body;
 
-    let currentLevel: WordHierarchy | string[] = words;
-
-    // Navega pela hierarquia para encontrar ou criar a categoria
-    for (const cat of categories) {
-        if (typeof currentLevel === 'object' && !Array.isArray(currentLevel)) {
-            if (currentLevel[cat]) {
-                currentLevel = currentLevel[cat] as WordHierarchy | string[];
-            } else {
-                // Se a categoria não existe, cria-a como um objeto
-                currentLevel[cat] = [];
-                currentLevel = currentLevel[cat] as WordHierarchy | string[]; // Cast para array ou WordHierarchy
-            }
-        } else {
-            // Se a categoria é um array de palavras, isso significa que já estamos no nível de palavras
-            return res.status(400).json({ error: `A categoria final '${cat}' não pode conter palavras.` });
-        }
+    if (!newWord || typeof newWord !== 'string') {
+        return res.status(400).json({ error: 'Palavra inválida.' });
     }
 
-    // Verifica se a categoria final é um array e adiciona a nova palavra
-    if (Array.isArray(currentLevel)) {
-        if (!currentLevel.includes(newWord)) {
-            currentLevel.push(newWord);
-        } else {
-            return res.status(400).json({ error: 'Palavra já existe na categoria.' });
-        }
+    const words = loadWords();
+
+    // Lida com categorias aninhadas
+    if (category === 'root') {
+        words[newWord] = {}; // Adiciona nova palavra na raiz
     } else {
-        // Se a categoria final não for um array, isso é um erro
-        return res.status(400).json({ error: 'A categoria final não pode conter palavras.' });
+        const categories = category.split('.');
+        let currentLevel = navigateToCategory(words, categories);
+
+        if (!currentLevel) {
+            return res.status(400).json({ error: 'Categoria não encontrada.' });
+        }
+
+        // Verifica se `currentLevel` é um objeto antes de indexá-lo
+        if (typeof currentLevel === 'object' && !Array.isArray(currentLevel)) {
+            currentLevel[newWord] = {}; // Adiciona a nova palavra como uma chave na categoria existente
+        } else {
+            return res.status(400).json({ error: 'Falha ao adicionar palavra. Estrutura incorreta.' });
+        }
     }
 
+    // Salvar a estrutura atualizada
     saveWords(words);
-    return res.status(201).json({ message: 'Palavra adicionada com sucesso.' });
+
+    return res.status(200).json({ message: 'Palavra adicionada com sucesso.' });
 });
+
+
 
 
 export default router;

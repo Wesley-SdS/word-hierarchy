@@ -1,18 +1,103 @@
 {
   "animais": {
     "mamiferos": {
-      "carnivoros": {
-        "felinos": ["leoes", "tigres", "jaguars", "leopardos"]
-      },
       "herbivoros": {
-        "equideos": ["cavalos", "zebras", "asnos"],
-        "bovideos": ["bois", "bufalos", "antilopes", "cabras"],
-        "primatas": ["gorilas", "chimpanzes", "orangotangos"]
-      }
+        "grandes": [
+          "elefante",
+          "rinoceronte",
+          "girafa",
+          "fsdfs",
+          "hipopotamo",
+          "hipopotamo",
+          "hipopotamo",
+          "hipopotamo",
+          "hipopotamo"
+        ],
+        "pequenos": [
+          "coelho",
+          "cabra"
+        ]
+      },
+      "omnivoros": []
     },
     "aves": {
-      "rapinas": ["aguias", "falcoes", "corujas", "milhafres"],
-      "passaros": ["canarios", "papagaios", "pardais", "rouxinois"]
+      "rapinas": [
+        "aguia",
+        "falcao",
+        "coruja"
+      ],
+      "passaros": [
+        "canario",
+        "papagaio",
+        "periquito"
+      ]
+    },
+    "repteis": {
+      "crocodilianos": [
+        "jacare",
+        "crocodilo"
+      ],
+      "lagartos": [
+        "camaleao",
+        "iguana"
+      ]
+    },
+    "criaturas": []
+  },
+  "plantas": {
+    "arvores": {
+      "frutiferas": [
+        "macieira",
+        "laranjeira",
+        "bananeira"
+      ],
+      "ornamentais": [
+        "bonsai",
+        "carvalho"
+      ]
+    },
+    "flores": {
+      "exoticas": [
+        "orquidea",
+        "lirio"
+      ],
+      "comuns": [
+        "rosa",
+        "margarida"
+      ]
     }
-  }
+  },
+  "veiculos": {
+    "terrestres": {
+      "carros": [
+        "sedan",
+        "suv",
+        "hatch"
+      ],
+      "motos": [
+        "esportiva",
+        "scooter"
+      ]
+    },
+    "aereos": [
+      "aviao",
+      "helicoptero",
+      "drones"
+    ],
+    "aquaticos": [
+      "navio",
+      "iate",
+      "submarino"
+    ]
+  },
+  "familia": {
+    "pai": {
+      "mãe": {},
+      "irmão": {},
+      "filho": {
+        "neto": {}
+      }
+    }
+  },
+  "carro": {}
 }
