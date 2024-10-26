@@ -1,28 +1,105 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Disclosure } from '@headlessui/react';
-import { FaEllipsisV, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEllipsisV, FaEdit, FaTrash, FaSave } from 'react-icons/fa';
 import { Menu, Transition } from '@headlessui/react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { toast } from 'react-toastify';
 
 interface WordNode {
   name: string;
   children: WordNode[];
+  parent?: WordNode | null;
 }
 
 interface HierarchyTreeProps {
   nodes: WordNode[];
   selectedParent: WordNode | null;
   onNodeClick: (node: WordNode) => void;
-  onEdit: (nodeToEdit: WordNode) => void;
   onRemove: (nodeToRemove: WordNode, parentNode: WordNode | null) => void;
 }
+
+// Função para obter o caminho completo da categoria
+const getCategoryPath = (node: WordNode | null): string => {
+  if (!node) return '';
+  let path = node.name;
+  let currentNode = node.parent;
+  while (currentNode) {
+    path = `${currentNode.name}.${path}`;
+    currentNode = currentNode.parent;
+  }
+  console.log('Category path:', path); // Verificar o caminho da categoria gerado
+  return path;
+};
 
 const HierarchyTree: React.FC<HierarchyTreeProps> = ({
   nodes,
   selectedParent,
   onNodeClick,
-  onEdit,
   onRemove,
 }) => {
+  const [editingNode, setEditingNode] = useState<WordNode | null>(null);
+  const [editedName, setEditedName] = useState<string>('');
+
+  // Função para ativar a edição
+  const handleEdit = (node: WordNode) => {
+    console.log('Editing node:', node.name); // Verificar qual nó está sendo editado
+    setEditingNode(node);
+    setEditedName(node.name); // Preenche com o nome original
+  };
+
+  // Função para salvar a edição
+  const handleSaveEdit = async (node: WordNode) => {
+    if (!editedName.trim()) {
+      toast.error('Please enter a valid word.');
+      return;
+    }
+
+    const categoryPath = getCategoryPath(selectedParent) || '';
+    console.log('Category path being sent:', categoryPath);
+    console.log('Old word:', node.name);
+    console.log('New word:', editedName);
+
+    try {
+      const response = await fetch('http://localhost:3001/words/edit', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ oldWord: node.name, newWord: editedName, category: categoryPath }),
+      });
+
+      console.log('Server response status:', response.status);
+
+      // Verifique o status da resposta para garantir que seja 2xx
+      if (response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.indexOf('application/json') !== -1) {
+          const data = await response.json(); // Verifique se a resposta está em JSON
+          console.log('Server response data:', data);
+          node.name = editedName; // Atualiza o nome localmente
+          setEditingNode(null); // Encerra o modo de edição
+          toast.success('Word edited successfully!');
+        } else {
+          // Verifique se o tipo de conteúdo não é JSON, pode ser HTML
+          const responseText = await response.text();
+          console.error('Unexpected response format:', responseText);
+          toast.error('Failed to edit word. Server returned an invalid response.');
+        }
+      } else {
+        // Erro com o status da resposta
+        const responseText = await response.text();
+        console.error('Server returned an error:', responseText);
+        toast.error('Failed to edit word. Server error occurred.');
+      }
+    } catch (error) {
+      console.error('Error during edit:', error);
+      toast.error('An error occurred while editing the word.');
+    }
+  };
+
+
+  // Renderização recursiva dos nós da árvore
   const renderNodes = (nodes: WordNode[], parent: WordNode | null = null) => {
     return nodes.map((node, index) => (
       <Disclosure key={index}>
@@ -32,19 +109,34 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
             {parent && (
               <div className={`absolute top-0 left-0 w-0.5 bg-gray-300 dark:bg-gray-500 ${index === nodes.length - 1 ? 'h-1/2' : 'h-full'}`}></div>
             )}
-            
+
             <div className="flex items-center justify-between pl-4">
               {/* Linha horizontal conectando os itens */}
               {parent && (
                 <div className="absolute top-1/2 left-0 w-6 h-0.5 bg-gray-300 dark:bg-gray-500"></div>
               )}
-              <div
-                className={`flex items-center gap-4 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-700 transition-colors duration-200 px-2 py-1 rounded ${selectedParent === node ? 'bg-blue-500 text-white' : ''}`}
-                onClick={() => onNodeClick(node)}
-              >
-                <span className="text-gray-900 dark:text-gray-200">{node.name}</span>
-                <Disclosure.Button className="ml-auto text-gray-900 dark:text-gray-200">{open ? '-' : '+'}</Disclosure.Button>
-              </div>
+
+              {editingNode === node ? (
+                <>
+                  <Input
+                    type="text"
+                    value={editedName}
+                    onChange={(e) => setEditedName(e.target.value)}
+                    className="border border-gray-300 rounded px-2 py-1 text-gray-900"
+                  />
+                  <Button onClick={() => handleSaveEdit(node)} className="ml-2 bg-blue-600 text-white hover:bg-blue-700">
+                    <FaSave className="mr-2" /> Save
+                  </Button>
+                </>
+              ) : (
+                <div
+                  className={`flex items-center gap-4 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-700 transition-colors duration-200 px-2 py-1 rounded ${selectedParent === node ? 'bg-blue-500 text-white' : ''}`}
+                  onClick={() => onNodeClick(node)}
+                >
+                  <span className="text-gray-900 dark:text-gray-200">{node.name}</span>
+                  <Disclosure.Button className="ml-auto text-gray-900 dark:text-gray-200">{open ? '-' : '+'}</Disclosure.Button>
+                </div>
+              )}
 
               <Menu as="div" className="relative inline-block text-left">
                 <Menu.Button className="focus:outline-none text-gray-900 dark:text-gray-200">
@@ -64,23 +156,18 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
                       <Menu.Item>
                         {({ active }) => (
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onEdit(node);
-                            }}
+                            onClick={() => handleEdit(node)}
                             className={`${active ? 'bg-gray-100 dark:bg-gray-600' : ''} group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 w-full`}
                           >
                             <FaEdit className="mr-2" /> Edit
                           </button>
                         )}
                       </Menu.Item>
+
                       <Menu.Item>
                         {({ active }) => (
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onRemove(node, parent);
-                            }}
+                            onClick={() => onRemove(node, parent)}
                             className={`${active ? 'bg-gray-100 dark:bg-gray-600' : ''} group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 w-full`}
                           >
                             <FaTrash className="mr-2" /> Remove

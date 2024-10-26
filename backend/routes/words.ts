@@ -130,7 +130,53 @@ router.post('/add', (req: Request, res: Response) => {
     return res.status(200).json({ message: 'Palavra adicionada com sucesso.' });
 });
 
+// Rota para editar uma palavra ou categoria
+router.put('/edit', (req: Request, res: Response) => {
+    const { oldWord, newWord, category } = req.body;
+
+    console.log(`Received request to edit word: "${oldWord}" to "${newWord}" under category: "${category}"`);
+
+    if (!oldWord || !newWord || typeof newWord !== 'string') {
+        return res.status(400).json({ error: 'Palavra inválida.' });
+    }
+
+    const words = loadWords();
+    const normalizedCategory = normalizeString(category);
+    const normalizedOldWord = normalizeString(oldWord);
+    const normalizedNewWord = normalizeString(newWord);
+
+    // Navegar para a categoria correta
+    const categories = normalizedCategory ? normalizedCategory.split('.') : [];
+    let currentLevel = navigateToCategory(words, categories);
+
+    if (!currentLevel) {
+        return res.status(400).json({ error: 'Categoria não encontrada.' });
+    }
+
+    // Verifica se a palavra existe na categoria
+    if (typeof currentLevel === 'object' && !Array.isArray(currentLevel)) {
+        if (currentLevel[normalizedOldWord]) {
+            // Remove a palavra antiga
+            const oldWordEntry = currentLevel[normalizedOldWord];
+            delete currentLevel[normalizedOldWord];
+
+            // Adiciona a nova palavra
+            currentLevel[normalizedNewWord] = oldWordEntry;
+            saveWords(words);
+            return res.status(200).json({ message: 'Palavra editada com sucesso.' });
+        } else {
+            return res.status(400).json({ error: 'A palavra não existe na categoria.' });
+        }
+    } else {
+        return res.status(400).json({ error: 'Falha ao editar palavra. Estrutura incorreta.' });
+    }
+});
+
+
 
 
 
 export default router;
+
+
+
