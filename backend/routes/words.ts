@@ -173,6 +173,55 @@ router.put('/edit', (req: Request, res: Response) => {
 });
 
 
+// Rota para deletar uma palavra ou categoria
+router.delete('/delete', (req: Request, res: Response) => {
+    const { wordToDelete, category } = req.body;
+
+    console.log(`Received request to delete word: "${wordToDelete}" under category: "${category}"`);
+
+    if (!wordToDelete) {
+        return res.status(400).json({ error: 'Palavra inválida.' });
+    }
+
+    const words = loadWords();
+    const normalizedWordToDelete = normalizeString(wordToDelete);
+    const normalizedCategory = category ? normalizeString(category) : 'root';
+
+    // Verifica se a exclusão é no nível raiz
+    if (normalizedCategory === 'root') {
+        if (words[normalizedWordToDelete]) {
+            delete words[normalizedWordToDelete];
+            saveWords(words);
+            return res.status(200).json({ message: 'Palavra/categoria removida com sucesso.' });
+        } else {
+            return res.status(400).json({ error: 'A palavra/categoria não existe na raiz.' });
+        }
+    }
+
+    // Navegar para a categoria correta
+    const categories = normalizedCategory.split('.');
+    let currentLevel = navigateToCategory(words, categories);
+
+    if (!currentLevel) {
+        return res.status(400).json({ error: 'Categoria não encontrada.' });
+    }
+
+    // Verifica se a palavra existe na categoria
+    if (typeof currentLevel === 'object' && !Array.isArray(currentLevel)) {
+        if (currentLevel[normalizedWordToDelete]) {
+            delete currentLevel[normalizedWordToDelete];
+            saveWords(words);
+            return res.status(200).json({ message: 'Palavra/categoria removida com sucesso.' });
+        } else {
+            return res.status(400).json({ error: 'A palavra/categoria não existe na categoria.' });
+        }
+    } else {
+        return res.status(400).json({ error: 'Falha ao remover palavra. Estrutura incorreta.' });
+    }
+});
+
+
+
 
 
 

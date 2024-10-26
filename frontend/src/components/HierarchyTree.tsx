@@ -5,6 +5,7 @@ import { Menu, Transition } from '@headlessui/react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
 
 interface WordNode {
   name: string;
@@ -16,7 +17,7 @@ interface HierarchyTreeProps {
   nodes: WordNode[];
   selectedParent: WordNode | null;
   onNodeClick: (node: WordNode) => void;
-  onRemove: (nodeToRemove: WordNode, parentNode: WordNode | null) => void;
+  onRemove: (nodeToRemove: WordNode) => void;
 }
 
 // Função para obter o caminho completo da categoria
@@ -40,6 +41,28 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
 }) => {
   const [editingNode, setEditingNode] = useState<WordNode | null>(null);
   const [editedName, setEditedName] = useState<string>('');
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const [nodeToRemove, setNodeToRemove] = useState<WordNode | null>(null);
+
+
+
+  const openRemoveDialog = (node: WordNode) => {
+    setNodeToRemove(node); // Define o nó que será removido
+    setIsDialogOpen(true); // Abre o diálogo
+  };
+
+
+
+
+
+
+  // Função para confirmar a remoção
+  const confirmRemove = () => {
+    if (nodeToRemove) {
+      onRemove(nodeToRemove);
+      setIsDialogOpen(false);
+    }
+  };
 
   // Função para ativar a edição
   const handleEdit = (node: WordNode) => {
@@ -99,6 +122,7 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
   };
 
 
+
   // Renderização recursiva dos nós da árvore
   const renderNodes = (nodes: WordNode[], parent: WordNode | null = null) => {
     return nodes.map((node, index) => (
@@ -138,6 +162,26 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
                 </div>
               )}
 
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Confirm Removal</DialogTitle>
+                    <DialogDescription>
+                      Are you sure you want to remove this word? This action cannot be undone.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button variant="destructive" onClick={confirmRemove}>
+                      Confirm
+                    </Button>
+                    <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>
+                      Cancel
+                    </Button>
+
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
               <Menu as="div" className="relative inline-block text-left">
                 <Menu.Button className="focus:outline-none text-gray-900 dark:text-gray-200">
                   <FaEllipsisV />
@@ -167,13 +211,18 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
                       <Menu.Item>
                         {({ active }) => (
                           <button
-                            onClick={() => onRemove(node, parent)}
+                            onClick={() => openRemoveDialog(node)} // Abre o diálogo em vez de remover diretamente
                             className={`${active ? 'bg-gray-100 dark:bg-gray-600' : ''} group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 w-full`}
                           >
                             <FaTrash className="mr-2" /> Remove
                           </button>
                         )}
                       </Menu.Item>
+
+
+
+
+
                     </div>
                   </Menu.Items>
                 </Transition>

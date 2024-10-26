@@ -32,6 +32,7 @@ interface WordNode {
     parent?: WordNode;
 }
 
+
 const convertObjectToArray = (obj: any, parent: WordNode | null = null): WordNode[] => {
     const result: WordNode[] = [];
     if (typeof obj === 'object' && obj !== null) {
@@ -100,7 +101,7 @@ const HierarchyBuilder: React.FC = () => {
     const [selectedParent, setSelectedParent] = useState<WordNode | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [nodeToRemove, setNodeToRemove] = useState<WordNode | null>(null);
-    const [nodeToEdit, setNodeToEdit] = useState<WordNode | null>(null);
+
 
 
 
@@ -227,6 +228,8 @@ const HierarchyBuilder: React.FC = () => {
         });
     };
 
+
+
     // Função para lidar com o clique na palavra da hierarquia
     const handleNodeClick = (node: WordNode) => {
         setSelectedParent(node);
@@ -241,6 +244,50 @@ const HierarchyBuilder: React.FC = () => {
             ...(node.children.length > 0 ? renderOptions(node.children) : [])
         ]);
     };
+
+    const handleRemoveNode = (nodeToRemove: WordNode) => {
+        // Função para remover o nó da hierarquia local
+        const removeNodeFromHierarchy = (nodes: WordNode[], nodeToRemove: WordNode): WordNode[] => {
+            return nodes
+                .filter(node => node !== nodeToRemove) // Filtra o nó a ser removido
+                .map(node => ({
+                    ...node,
+                    children: removeNodeFromHierarchy(node.children, nodeToRemove), // Chamada recursiva para os filhos
+                }));
+        };
+
+        // Atualizar a hierarquia após remoção
+        setHierarchy(prevHierarchy => removeNodeFromHierarchy(prevHierarchy, nodeToRemove));
+
+        // Chamar a remoção no backend
+        const categoryPath = getCategoryPath(nodeToRemove.parent || null) || 'root';
+        fetch('http://localhost:3001/words/delete', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                wordToDelete: nodeToRemove.name,
+                category: categoryPath,
+            }),
+        })
+            .then(response => {
+                if (response.ok) {
+                    toast.success('Word deleted successfully!');
+                } else {
+                    return response.json().then(data => {
+                        toast.error(`Failed to delete word: ${data.error}`);
+                    });
+                }
+            })
+            .catch(error => {
+                toast.error('An error occurred while deleting the word.');
+            });
+    };
+
+
+
+
 
     return (
         <div className="p-6 w-full max-w-5xl mx-auto border-2 rounded-lg">
@@ -283,8 +330,11 @@ const HierarchyBuilder: React.FC = () => {
                 nodes={filteredHierarchy}
                 onNodeClick={setSelectedParent}
                 selectedParent={selectedParent}
-                onRemove={() => { }}
+                onRemove={handleRemoveNode}  
             />
+
+
+
 
 
             <SaveButton hierarchy={hierarchy} />

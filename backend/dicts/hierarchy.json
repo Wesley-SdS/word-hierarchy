@@ -1,13 +1,13 @@
 {
-  "Igreja": {
-    "Católico": {
-      "Missa": {
-        "Oração": {
-          "Oração de Louvor": {},
-          "Oração de Súplica": {},
-          "Oração de Ação de Graças": {},
-          "Oração de Intercessão": {},
-          "Oração Contemplativa": {},
+  "igreja catolica": {
+    "catolico": {
+      "missa": {
+        "oracao": {
+          "oracao de louvor": {},
+          "oracao de suplica": {},
+          "oracao de acao de gracas": {},
+          "oracao de intercessao": {},
+          "oracao contemplativa": {},
           "terco": {
             "mariano": {},
             "misericordia": {},
@@ -15,35 +15,25 @@
           }
         }
       },
-      "Sacramentos": {
-        "Batismo": {},
-        "Crisma": {},
-        "Eucaristia": {},
-        "Penitência": {},
-        "Matrimônio": {},
-        "Ordem": {},
-        "Unção dos Enfermos": {}
+      "sacramentos": {
+        "batismo": {},
+        "crisma": {},
+        "eucaristia": {},
+        "penitencia": {},
+        "matrimonio": {},
+        "ordem": {},
+        "uncao dos enfermos": {}
       }
     },
-    "São Pedro": {},
-    "Santa Maria": {},
-    "São José": {},
-    "Santa Teresa": {},
-    "Santo Antão": {},
-    "Santa Clara": {},
-    "São Francisco": {},
-    "Santa Fátima": {},
+    "sao pedro": {},
+    "santa maria": {},
+    "sao jose": {},
+    "santa teresa": {},
+    "santo antao": {},
+    "santa clara": {},
+    "sao francisco": {},
+    "santa fatima": {},
     "santa rita de cassia": {},
     "musica": {}
-  },
-  "animais": {
-    "mamiferos marinhos": {
-      "grandes": {},
-      "pequenos": {
-        "rato": {
-          "ratinho": {}
-        }
-      }
-    }
   }
 }
