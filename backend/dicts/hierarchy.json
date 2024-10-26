@@ -92,12 +92,45 @@
   },
   "familia": {
     "pai": {
-      "mãe": {},
+      "mãe": {
+        "avó": {
+          "bisavó": {}
+        }
+      },
       "irmão": {},
       "filho": {
         "neto": {}
       }
     }
   },
-  "carro": {}
+  "Igreja": {
+    "Católico": {
+      "Missa": {
+        "Oração": {
+          "Oração de Louvor": {},
+          "Oração de Súplica": {},
+          "Oração de Ação de Graças": {},
+          "Oração de Intercessão": {},
+          "Oração Contemplativa": {}
+        }
+      },
+      "Sacramentos": {
+        "Batismo": {},
+        "Crisma": {},
+        "Eucaristia": {},
+        "Penitência": {},
+        "Matrimônio": {},
+        "Ordem": {},
+        "Unção dos Enfermos": {}
+      }
+    },
+    "São Pedro": {},
+    "Santa Maria": {},
+    "São José": {},
+    "Santa Teresa": {},
+    "Santo Antão": {},
+    "Santa Clara": {},
+    "São Francisco": {},
+    "Santa Fátima": {}
+  }
 }
