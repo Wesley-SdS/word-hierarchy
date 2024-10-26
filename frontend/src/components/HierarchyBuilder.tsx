@@ -16,23 +16,22 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-// Função para normalizar strings (converte para minúsculas, remove acentos e espaços extras)
+
 const normalizeString = (str: string): string => {
     return str
-        .toLowerCase() // Converte para minúsculas
-        .normalize("NFD") // Normaliza acentos
-        .replace(/[\u0300-\u036f]/g, "") // Remove acentos
-        .trim(); // Remove espaços extras no início e fim
+        .toLowerCase() 
+        .normalize("NFD") 
+        .replace(/[\u0300-\u036f]/g, "") 
+        .trim(); 
 };
 
-// Definição da interface
+
 interface WordNode {
     name: string;
     children: WordNode[];
-    parent?: WordNode;  // Adiciona referência ao pai para construir o caminho
+    parent?: WordNode;  
 }
 
-// Função para converter o objeto JSON em um array de WordNode
 const convertObjectToArray = (obj: any, parent: WordNode | null = null): WordNode[] => {
     const result: WordNode[] = [];
     if (typeof obj === 'object' && obj !== null) {
@@ -42,7 +41,7 @@ const convertObjectToArray = (obj: any, parent: WordNode | null = null): WordNod
                 const node: WordNode = {
                     name: key,
                     children: [],
-                    parent: parent || undefined,  // Mantém a referência ao pai
+                    parent: parent || undefined, 
                 };
                 if (Array.isArray(value)) {
                     node.children = value.map((child) => ({
@@ -72,9 +71,31 @@ const getCategoryPath = (node: WordNode | null): string => {
     return path;
 };
 
-// Estrutura básica do componente
+// Função de filtro baseada na query de busca
+const filterHierarchy = (nodes: WordNode[], query: string): WordNode[] => {
+    if (!query) return nodes;
+
+    return nodes.reduce<WordNode[]>((acc, node) => {
+        if (normalizeString(node.name).includes(normalizeString(query))) {
+            acc.push(node);
+        }
+
+        const filteredChildren = filterHierarchy(node.children, query);
+        if (filteredChildren.length > 0) {
+            acc.push({
+                ...node,
+                children: filteredChildren,
+            });
+        }
+
+        return acc;
+    }, []);
+};
+
+
 const HierarchyBuilder: React.FC = () => {
     const [hierarchy, setHierarchy] = useState<WordNode[]>([]);
+    const [filteredHierarchy, setFilteredHierarchy] = useState<WordNode[]>([]);
     const [newWord, setNewWord] = useState('');
     const [selectedParent, setSelectedParent] = useState<WordNode | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -83,89 +104,102 @@ const HierarchyBuilder: React.FC = () => {
     // Função para buscar a hierarquia do backend
     const loadHierarchy = async () => {
         try {
-            const response = await fetch('http://localhost:3001/words'); // Endpoint GET
+            const response = await fetch('http://localhost:3001/words'); 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            console.log('Data from backend:', data); // Debugging line
-            const hierarchyArray = convertObjectToArray(data); // Converter para array de WordNode
-            setHierarchy(hierarchyArray); // Atualizar o estado com a hierarquia
-            console.log('Hierarchy Loaded:', hierarchyArray); // Verifique a hierarquia carregada
+            const hierarchyArray = convertObjectToArray(data); 
+            setHierarchy(hierarchyArray); 
+            setFilteredHierarchy(hierarchyArray); 
         } catch (error) {
-            console.error('Error loading hierarchy:', error); // Detalhe o erro aqui
             toast.error('Failed to load hierarchy from backend.');
         }
     };
+
+    // Atualiza a hierarquia filtrada com base na busca
+    useEffect(() => {
+        setFilteredHierarchy(filterHierarchy(hierarchy, searchQuery));
+    }, [searchQuery, hierarchy]);
 
     // useEffect para carregar a hierarquia na montagem do componente
     useEffect(() => {
         loadHierarchy();
     }, []);
 
-    // Função para adicionar palavras/categorias
-    const addWord = async () => {
-        console.log('New Word:', newWord);
-        console.log('Selected Parent:', selectedParent);  // Adiciona um log para verificar o selectedParent
+// Função para verificar se uma palavra já existe em qualquer nível da hierarquia
+const wordExistsInHierarchy = (nodes: WordNode[], word: string): boolean => {
+    return nodes.some(node => 
+        normalizeString(node.name) === normalizeString(word) || 
+        wordExistsInHierarchy(node.children, word)
+    );
+};
 
-        // Validação da nova palavra
-        if (!newWord.trim()) {
-            toast.error('Please enter a word.');
-            return;
+// Função para adicionar palavras/categorias
+const addWord = async () => {
+    console.log('New Word:', newWord);
+    console.log('Selected Parent:', selectedParent);  
+
+    // Validação da nova palavra
+    if (!newWord.trim()) {
+        toast.error('Please enter a word.');
+        return;
+    }
+
+    if (newWord.length > 30) {
+        toast.error('Word must not exceed 30 characters.');
+        return;
+    }
+
+    // Verifica se a palavra já existe em qualquer nível da hierarquia
+    const exists = wordExistsInHierarchy(hierarchy, newWord);
+    if (exists) {
+        toast.error('This word already exists in the hierarchy.');
+        return;
+    }
+
+    const newNode: WordNode = { name: newWord, children: [], parent: selectedParent };
+
+    try {
+        const categoryPath = getCategoryPath(selectedParent);  
+        const payload = {
+            category: categoryPath || 'root',  
+            newWord: normalizeString(newWord),  
+        };
+        console.log('Sending to backend:', payload);  
+
+    
+        const response = await fetch('http://localhost:3001/words/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        // Verificando a resposta do backend
+        if (response.ok) {
+            const updatedHierarchy = selectedParent
+                ? addChildToParent(hierarchy, selectedParent.name, newNode)
+                : [...hierarchy, newNode];
+
+            setHierarchy(updatedHierarchy);
+            toast.success('Word added successfully!');
+        } else {
+            const errorData = await response.json();
+            console.error('Error response from backend:', errorData); 
+            toast.error(`Failed to add word: ${errorData.error}`);
         }
+    } catch (error) {
+        toast.error('An error occurred while adding the word.');
+        console.error('Error adding word:', error);
+    }
 
-        if (newWord.length > 30) {
-            toast.error('Word must not exceed 30 characters.');
-            return;
-        }
+    setNewWord('');
+    setSelectedParent(null);
+};
 
-        // Verifica se a palavra já existe na hierarquia
-        const exists = hierarchy.some(node => normalizeString(node.name) === normalizeString(newWord));
-        if (exists) {
-            toast.error('This word already exists in the hierarchy.');
-            return;
-        }
 
-        const newNode: WordNode = { name: newWord, children: [], parent: selectedParent };
-
-        try {
-            const categoryPath = getCategoryPath(selectedParent);  // Obtem o caminho completo da categoria
-            const payload = {
-                category: categoryPath || 'root',  // Envia o caminho completo ou 'root' se não houver pai
-                newWord: normalizeString(newWord),  // Normaliza a nova palavra
-            };
-            console.log('Sending to backend:', payload);  // Log para verificar o payload enviado
-
-            // POST com a palavra e categoria
-            const response = await fetch('http://localhost:3001/words/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            });
-
-            // Verificando a resposta do backend
-            if (response.ok) {
-                const updatedHierarchy = selectedParent
-                    ? addChildToParent(hierarchy, selectedParent.name, newNode)
-                    : [...hierarchy, newNode];
-
-                setHierarchy(updatedHierarchy);
-                toast.success('Word added successfully!');
-            } else {
-                const errorData = await response.json();
-                console.error('Error response from backend:', errorData);  // Logando a resposta de erro do backend
-                toast.error(`Failed to add word: ${errorData.error}`);
-            }
-        } catch (error) {
-            toast.error('An error occurred while adding the word.');
-            console.error('Error adding word:', error);
-        }
-
-        setNewWord('');
-        setSelectedParent(null);
-    };
 
     // Função para adicionar um filho à hierarquia de forma recursiva
     const addChildToParent = (nodes: WordNode[], parentName: string, child: WordNode): WordNode[] => {
@@ -188,17 +222,17 @@ const HierarchyBuilder: React.FC = () => {
 
     // Função para lidar com o clique na palavra da hierarquia
     const handleNodeClick = (node: WordNode) => {
-        setSelectedParent(node); // Define o parent selecionado para a palavra clicada
+        setSelectedParent(node); 
     };
 
     // Função recursiva para renderizar opções do select com subcategorias
     const renderOptions = (nodes: WordNode[]): JSX.Element[] => {
-        return nodes.map((node, index) => (
-            <React.Fragment key={`${node.name}-${index}`}>  {/* Ajuste na key */}
-                <option value={node.name}>{node.name}</option>
-                {node.children.length > 0 && renderOptions(node.children)}
-            </React.Fragment>
-        ));
+        return nodes.flatMap((node, index) => [
+            <option key={`${getCategoryPath(node)}-${index}`} value={getCategoryPath(node)}>
+                {node.name}
+            </option>,
+            ...(node.children.length > 0 ? renderOptions(node.children) : [])
+        ]);
     };
 
     return (
@@ -215,10 +249,19 @@ const HierarchyBuilder: React.FC = () => {
                 />
                 <select
                     onChange={(e) => {
-                        const selectedNode = hierarchy.find(node => normalizeString(node.name) === normalizeString(e.target.value)) || null;
-                        setSelectedParent(selectedNode);
+                        const selectedPath = e.target.value; 
+                        const findNodeByPath = (nodes: WordNode[], path: string): WordNode | null => {
+                            for (const node of nodes) {
+                                if (getCategoryPath(node) === path) return node;
+                                const foundInChildren = findNodeByPath(node.children, path);
+                                if (foundInChildren) return foundInChildren;
+                            }
+                            return null;
+                        };
+                        const selectedNode = findNodeByPath(hierarchy, selectedPath); 
+                        setSelectedParent(selectedNode);  
                     }}
-                    value={selectedParent ? selectedParent.name : ''}
+                    value={selectedParent ? getCategoryPath(selectedParent) : ''}
                     className="border border-gray-300 rounded px-4 py-2 flex-grow mr-2 bg-white text-gray-800 dark:text-gray-200 dark:border-gray-600"
                 >
                     <option value="">Select Parent Category</option>
@@ -229,7 +272,7 @@ const HierarchyBuilder: React.FC = () => {
                 </Button>
             </div>
             {selectedParent && <p className="mt-4 text-lg text-gray-600">Selected Parent: <strong>{selectedParent.name}</strong></p>}
-            <HierarchyTree nodes={hierarchy} onNodeClick={handleNodeClick} selectedParent={selectedParent} />
+            <HierarchyTree nodes={filteredHierarchy} onNodeClick={handleNodeClick} selectedParent={selectedParent} />
             <SaveButton hierarchy={hierarchy} />
 
             <Dialog open={!!nodeToRemove} onOpenChange={() => setNodeToRemove(null)}>

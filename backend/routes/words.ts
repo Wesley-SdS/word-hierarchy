@@ -101,15 +101,22 @@ router.post('/add', (req: Request, res: Response) => {
     const categories = normalizedCategory.split('.');
     let currentLevel = navigateToCategory(words, categories);
 
+    // Se o nível atual for null, significa que a categoria não foi encontrada, então vamos adicionar na raiz
     if (!currentLevel) {
-        console.log(`Category "${category}" not found after navigation.`);
-        return res.status(400).json({ error: 'Categoria não encontrada.' });
+        console.log(`Category "${category}" not found after navigation, adding at root.`);
+        if (!words[normalizedWord]) {
+            words[normalizedWord] = {}; // Adiciona a nova palavra como chave na raiz
+            console.log(`Added word: "${normalizedWord}" to root.`);
+        } else {
+            return res.status(400).json({ error: 'A palavra já existe na raiz.' });
+        }
+        saveWords(words);
+        return res.status(200).json({ message: 'Palavra adicionada com sucesso na raiz.' });
     }
 
     // Verificar se o nível atual contém subcategorias
     if (typeof currentLevel === 'object' && !Array.isArray(currentLevel)) {
-        // Aqui, ao invés de usar um campo "palavras", apenas adicionamos a palavra como um novo item no nível atual
-        if (!Object.keys(currentLevel).includes(normalizedWord)) {
+        if (!currentLevel[normalizedWord]) {
             currentLevel[normalizedWord] = {}; // Adiciona a palavra como chave
             console.log(`Added word: "${normalizedWord}" to category: "${category}"`);
         } else {
@@ -122,6 +129,7 @@ router.post('/add', (req: Request, res: Response) => {
     saveWords(words);
     return res.status(200).json({ message: 'Palavra adicionada com sucesso.' });
 });
+
 
 
 

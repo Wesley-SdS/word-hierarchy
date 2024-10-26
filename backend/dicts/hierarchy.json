@@ -1,108 +1,4 @@
 {
-  "animais": {
-    "mamiferos": {
-      "herbivoros": {
-        "grandes": [
-          "elefante",
-          "rinoceronte",
-          "girafa",
-          "fsdfs",
-          "hipopotamo",
-          "hipopotamo",
-          "hipopotamo",
-          "hipopotamo",
-          "hipopotamo"
-        ],
-        "pequenos": [
-          "coelho",
-          "cabra"
-        ]
-      },
-      "omnivoros": []
-    },
-    "aves": {
-      "rapinas": [
-        "aguia",
-        "falcao",
-        "coruja"
-      ],
-      "passaros": [
-        "canario",
-        "papagaio",
-        "periquito"
-      ]
-    },
-    "repteis": {
-      "crocodilianos": [
-        "jacare",
-        "crocodilo"
-      ],
-      "lagartos": [
-        "camaleao",
-        "iguana"
-      ]
-    },
-    "criaturas": []
-  },
-  "plantas": {
-    "arvores": {
-      "frutiferas": [
-        "macieira",
-        "laranjeira",
-        "bananeira"
-      ],
-      "ornamentais": [
-        "bonsai",
-        "carvalho"
-      ]
-    },
-    "flores": {
-      "exoticas": [
-        "orquidea",
-        "lirio"
-      ],
-      "comuns": [
-        "rosa",
-        "margarida"
-      ]
-    }
-  },
-  "veiculos": {
-    "terrestres": {
-      "carros": [
-        "sedan",
-        "suv",
-        "hatch"
-      ],
-      "motos": [
-        "esportiva",
-        "scooter"
-      ]
-    },
-    "aereos": [
-      "aviao",
-      "helicoptero",
-      "drones"
-    ],
-    "aquaticos": [
-      "navio",
-      "iate",
-      "submarino"
-    ]
-  },
-  "familia": {
-    "pai": {
-      "mãe": {
-        "avó": {
-          "bisavó": {}
-        }
-      },
-      "irmão": {},
-      "filho": {
-        "neto": {}
-      }
-    }
-  },
   "Igreja": {
     "Católico": {
       "Missa": {
@@ -111,7 +7,12 @@
           "Oração de Súplica": {},
           "Oração de Ação de Graças": {},
           "Oração de Intercessão": {},
-          "Oração Contemplativa": {}
+          "Oração Contemplativa": {},
+          "terco": {
+            "mariano": {},
+            "misericordia": {},
+            "santa rita de cassia": {}
+          }
         }
       },
       "Sacramentos": {
@@ -131,6 +32,14 @@
     "Santo Antão": {},
     "Santa Clara": {},
     "São Francisco": {},
-    "Santa Fátima": {}
+    "Santa Fátima": {},
+    "santa rita de cassia": {},
+    "musica": {},
+    "teste": {},
+    "teste 2": {}
+  },
+  "animais": {},
+  "testado": {
+    "hoje": {}
   }
 }
