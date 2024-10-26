@@ -34,6 +34,51 @@
     "sao francisco": {},
     "santa fatima": {},
     "santa rita de cassia": {},
-    "musica": {}
+    "musica": {},
+    "familia": {}
+  },
+  "animalis": {
+    "mamiferos": {
+      "carnivoros": {
+        "felinos": {
+          "leoes": {},
+          "tigres": {},
+          "jaguars": {},
+          "leopardos": {}
+        }
+      },
+      "herbivoros": {
+        "equideos": {
+          "cavalos": {},
+          "zebras": {},
+          "asnos": {}
+        },
+        "bovideos": {
+          "bois": {},
+          "bufalos": {},
+          "antilopes": {},
+          "cabras": {}
+        }
+      },
+      "primatas": {
+        "gorilas": {},
+        "chimpanzes": {},
+        "orangotangos": {}
+      }
+    },
+    "aves": {
+      "rapinas": {
+        "aguias": {},
+        "falcoes": {},
+        "corujas": {},
+        "milhafres": {}
+      },
+      "passaros": {
+        "canarios": {},
+        "papagaios": {},
+        "pardais": {},
+        "rouxinois": {}
+      }
+    }
   }
 }

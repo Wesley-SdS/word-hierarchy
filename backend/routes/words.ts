@@ -173,6 +173,9 @@ router.put('/edit', (req: Request, res: Response) => {
 });
 
 
+
+
+
 // Rota para deletar uma palavra ou categoria
 router.delete('/delete', (req: Request, res: Response) => {
     const { wordToDelete, category } = req.body;

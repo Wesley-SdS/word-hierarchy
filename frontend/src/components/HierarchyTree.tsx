@@ -29,7 +29,7 @@ const getCategoryPath = (node: WordNode | null): string => {
     path = `${currentNode.name}.${path}`;
     currentNode = currentNode.parent;
   }
-  console.log('Category path:', path); // Verificar o caminho da categoria gerado
+  console.log('Category path:', path); 
   return path;
 };
 
@@ -52,10 +52,6 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
   };
 
 
-
-
-
-
   // Função para confirmar a remoção
   const confirmRemove = () => {
     if (nodeToRemove) {
@@ -64,8 +60,8 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
     }
   };
 
-  // Função para ativar a edição
-  const handleEdit = (node: WordNode) => {
+   // Função para ativar a edição
+   const handleEdit = (node: WordNode) => {
     console.log('Editing node:', node.name); // Verificar qual nó está sendo editado
     setEditingNode(node);
     setEditedName(node.name); // Preenche com o nome original
@@ -134,7 +130,7 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
               <div className={`absolute top-0 left-0 w-0.5 bg-gray-300 dark:bg-gray-500 ${index === nodes.length - 1 ? 'h-1/2' : 'h-full'}`}></div>
             )}
 
-            <div className="flex items-center justify-between pl-4">
+            <div className="flex items-center justify-between pl-6">
               {/* Linha horizontal conectando os itens */}
               {parent && (
                 <div className="absolute top-1/2 left-0 w-6 h-0.5 bg-gray-300 dark:bg-gray-500"></div>
@@ -148,34 +144,34 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
                     onChange={(e) => setEditedName(e.target.value)}
                     className="border border-gray-300 rounded px-2 py-1 text-gray-900"
                   />
-                  <Button onClick={() => handleSaveEdit(node)} className="ml-2 bg-blue-600 text-white hover:bg-blue-700">
+                  <Button onClick={() => handleSaveEdit(node)} className="mx-4 bg-violet-600 text-white hover:bg-violet-700">
                     <FaSave className="mr-2" /> Save
                   </Button>
                 </>
               ) : (
                 <div
-                  className={`flex items-center gap-4 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-700 transition-colors duration-200 px-2 py-1 rounded ${selectedParent === node ? 'bg-blue-500 text-white' : ''}`}
+                  className={`flex items-center gap-4 cursor-pointer hover:bg-blue-50 dark:hover:bg-indigo-600 transition-colors duration-200 px-2 py-1 rounded ${selectedParent === node ? 'bg-indigo-300 text-white' : ''}`}
                   onClick={() => onNodeClick(node)}
                 >
-                  <span className="text-gray-900 dark:text-gray-200">{node.name}</span>
-                  <Disclosure.Button className="ml-auto text-gray-900 dark:text-gray-200">{open ? '-' : '+'}</Disclosure.Button>
+                  <span className="text-lg text-gray-900  dark:text-gray-800">{node.name}</span>
+                  <Disclosure.Button className="ml-auto text-gray-900 dark:text-gray-800">{open ? '-' : '+'}</Disclosure.Button>
                 </div>
               )}
 
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Confirm Removal</DialogTitle>
+                    <DialogTitle>Deletando...</DialogTitle>
                     <DialogDescription>
-                      Are you sure you want to remove this word? This action cannot be undone.
+                    Tem certeza de que deseja remover esta palavra? Esta ação não pode ser desfeita.
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
                     <Button variant="destructive" onClick={confirmRemove}>
-                      Confirm
+                      Confirmar
                     </Button>
                     <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>
-                      Cancel
+                      Cancelar
                     </Button>
 
                   </DialogFooter>
@@ -183,7 +179,7 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
               </Dialog>
 
               <Menu as="div" className="relative inline-block text-left">
-                <Menu.Button className="focus:outline-none text-gray-900 dark:text-gray-200">
+                <Menu.Button className="focus:outline-none text-gray-900 dark:text-gray-800 ">
                   <FaEllipsisV />
                 </Menu.Button>
                 <Transition

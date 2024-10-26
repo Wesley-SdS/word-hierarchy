@@ -290,16 +290,16 @@ const HierarchyBuilder: React.FC = () => {
 
 
     return (
-        <div className="p-6 w-full max-w-5xl mx-auto border-2 rounded-lg">
-            <h1 className="text-3xl font-bold mb-4 text-gray-800">Create Word Hierarchy</h1>
+        <div className="p-6 w-full max-w-5xl mx-auto border-2 rounded-lg bg-white dark:bg-gray-300 border-gray-300 dark:border-gray-700 transition-colors duration-300">
+            <h1 className="text-3xl font-bold mb-4 text-gray-800 ">Create Word Hierarchy</h1>
             <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             <div className="flex mb-4">
                 <Input
                     type="text"
-                    placeholder="Enter word"
+                    placeholder="Adicione a Palavra:"
                     value={newWord}
                     onChange={(e) => setNewWord(e.target.value)}
-                    className="border border-gray-300 rounded px-4 py-2 flex-grow mr-2 bg-white text-gray-800 dark:text-gray-200 dark:border-gray-600"
+                    className="border border-gray-300 rounded px-4 py-2 flex-grow mr-2 bg-white text-gray-800 dark:text-gray-800 dark:border-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-800"
                 />
                 <select
                     onChange={(e) => {
@@ -316,21 +316,21 @@ const HierarchyBuilder: React.FC = () => {
                         setSelectedParent(selectedNode);
                     }}
                     value={selectedParent ? getCategoryPath(selectedParent) : ''}
-                    className="border border-gray-300 rounded px-4 py-2 flex-grow mr-2 bg-white text-gray-800 dark:text-gray-200 dark:border-gray-600"
+                    className="border border-gray-300 rounded px-4 py-2 flex-grow mr-2 bg-white text-gray-800 dark:text-gray-800 dark:border-gray-600"
                 >
-                    <option value="">Select Parent Category</option>
+                    <option value="">Selecione uma Categoria</option>
                     {renderOptions(hierarchy)}
                 </select>
                 <Button onClick={addWord} className="flex items-center bg-violet-600 text-white rounded px-4 py-2 hover:bg-violet-700 transition-colors">
-                    <FaPlus className="mr-2" /> Add
+                    <FaPlus className="mr-2" /> Salvar
                 </Button>
             </div>
-            {selectedParent && <p className="mt-4 text-lg text-gray-600">Selected Parent: <strong>{selectedParent.name}</strong></p>}
+            {selectedParent && <p className="mt-4 text-lg text-gray-700">Categoria Selecionada: <strong>{selectedParent.name}</strong></p>}
             <HierarchyTree
                 nodes={filteredHierarchy}
                 onNodeClick={setSelectedParent}
                 selectedParent={selectedParent}
-                onRemove={handleRemoveNode}  
+                onRemove={handleRemoveNode}
             />
 
 
@@ -345,17 +345,17 @@ const HierarchyBuilder: React.FC = () => {
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Are you sure you want to remove this word?</DialogTitle>
+                        <DialogTitle>Tem certeza de que deseja remover esta palavra?</DialogTitle>
                         <DialogDescription>
-                            This action cannot be undone. Please confirm if you want to proceed.
+                        Esta ação não pode ser desfeita. Por favor, confirme se você deseja prosseguir.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex justify-end">
                         <Button className="bg-red-500 text-white rounded px-4 py-2 mr-2 hover:bg-red-600 transition-colors">
-                            Confirm
+                            Confirmar
                         </Button>
                         <Button onClick={() => setNodeToRemove(null)} className="bg-white text-black border-2 border-gray-100 rounded px-4 py-2 hover:bg-gray-100 transition-colors">
-                            Cancel
+                            Cancelar
                         </Button>
                     </div>
                 </DialogContent>
