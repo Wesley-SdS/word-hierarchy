@@ -2,21 +2,21 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const loadHierarchy = () => {
-  const startLoadTime = Date.now(); // Início do tempo de carregamento
+  const startLoadTime = Date.now(); 
   const filePath = path.join(__dirname, 'dicts', 'hierarchy.json');
   const data = fs.readFileSync(filePath, 'utf-8');
   const hierarchy = JSON.parse(data);
-  const endLoadTime = Date.now(); // Fim do tempo de carregamento
+  const endLoadTime = Date.now(); 
 
-  return { hierarchy, loadTime: endLoadTime - startLoadTime }; // Retorna a hierarquia e o tempo de carregamento
+  return { hierarchy, loadTime: endLoadTime - startLoadTime }; 
 };
 
 const normalizeString = (str: string): string => {
   return str
-    .normalize("NFD") // Normaliza acentos
-    .replace(/[\u0300-\u036f]/g, "") // Remove acentos
-    .replace(/[^\w\s]/gi, '') // Remove pontuação, mas mantém espaços
-    .toLowerCase().trim(); // Converte para minúsculas e remove espaços extras no início/fim
+    .normalize("NFD") 
+    .replace(/[\u0300-\u036f]/g, "") 
+    .replace(/[^\w\s]/gi, '') 
+    .toLowerCase().trim(); 
 };
 
 const logVerbose = (message: string, verbose: boolean) => {
@@ -26,12 +26,12 @@ const logVerbose = (message: string, verbose: boolean) => {
 };
 
 const analyzePhrase = (phrase: string, depth: number, verbose: boolean) => {
-  const { hierarchy, loadTime } = loadHierarchy(); // Carrega hierarquia e calcula tempo
+  const { hierarchy, loadTime } = loadHierarchy(); 
   const words = phrase.split(/[\s,]+/).map(normalizeString);
   const matches: Record<string, number> = {};
   const verifiedWords = new Set<string>();
 
-  const startVerifyTime = Date.now(); // Início do tempo de verificação da frase
+  const startVerifyTime = Date.now(); 
 
   const searchHierarchy = (rootNode: any, maxDepth: number) => {
     const normalizedCache: { [key: string]: string } = {};
@@ -44,7 +44,7 @@ const analyzePhrase = (phrase: string, depth: number, verbose: boolean) => {
     };
 
     const stack = [{ node: rootNode, depth: 1 }];
-    const maxWordsToCombine = 2; // Reduzir para até 2 palavras combinadas
+    const maxWordsToCombine = 2; 
     let foundAllWords = false;
 
     while (stack.length > 0 && !foundAllWords) {
@@ -68,14 +68,14 @@ const analyzePhrase = (phrase: string, depth: number, verbose: boolean) => {
                   matches[normalizedKey] = (matches[normalizedKey] || 0) + 1;
                   verifiedWords.add(normalizedSubPhrase);
 
-                  // Se todas as palavras foram encontradas, interrompe a busca
+                  
                   if (verifiedWords.size === words.length) {
                     foundAllWords = true;
                     break;
                   }
                 }
 
-                // Se for uma subcategoria, continue buscando
+                
                 if (value && typeof value === 'object' && Object.keys(value).length > 0) {
                   stack.push({ node: value, depth: depth + 1 });
                 }
@@ -91,9 +91,9 @@ const analyzePhrase = (phrase: string, depth: number, verbose: boolean) => {
 
   searchHierarchy(hierarchy, depth);
 
-  const verifyEnd = Date.now(); // Fim do tempo de verificação da frase
+  const verifyEnd = Date.now(); 
 
-  // Log dos tempos
+  
   if (verbose) {
     console.log(`Tempo de carregamento dos parâmetros: ${loadTime}ms`);
     console.log(`Tempo de verificação da frase: ${verifyEnd - startVerifyTime}ms`);
