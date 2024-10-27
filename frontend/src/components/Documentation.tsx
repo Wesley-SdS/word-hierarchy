@@ -138,7 +138,7 @@ const Documentation: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Galeria de Imagens */}
+            
                 <section className="my-32">
                     <h2 className="text-3xl font-semibold text-indigo-600 dark:text-indigo-400 my-16">Galeria de Imagens</h2>
                     <div className="w-full flex flex-wrap gap-10 justify-center">
@@ -160,7 +160,7 @@ const Documentation: React.FC = () => {
                     </div>
                 </section>
 
-                {/* Melhorias Propostas */}
+                
                 <section className="mb-16">
                     <h2 className="text-3xl font-semibold text-indigo-600 dark:text-indigo-400 mb-6">Melhorias Propostas</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -204,6 +204,10 @@ const Documentation: React.FC = () => {
                             {
                                 title: '10. Testes mais Abrangentes',
                                 description: 'Aumentar a cobertura de testes no backend e frontend para garantir robustez e funcionalidade.',
+                            },
+                            {
+                                title: '11. Melhorias na Normalização',
+                                description: 'Melhoraria a normalização para que o visual fique mais natural, permitindo acentos, espaços e letras maiúsculas.',
                             },
                         ].map((improvement, index) => (
                             <Transition
