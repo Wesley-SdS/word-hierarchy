@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Disclosure } from '@headlessui/react';
-import { FaEllipsisV, FaEdit, FaTrash, FaSave } from 'react-icons/fa';
+import { FaEllipsisV, FaEdit, FaTrash, FaSave, FaTimes } from 'react-icons/fa';
 import { Menu, Transition } from '@headlessui/react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -15,12 +15,13 @@ interface WordNode {
 
 interface HierarchyTreeProps {
   nodes: WordNode[];
+  onNodeClick: (node: WordNode | null) => void;
   selectedParent: WordNode | null;
-  onNodeClick: (node: WordNode) => void;
   onRemove: (nodeToRemove: WordNode) => void;
 }
 
-// Função para obter o caminho completo da categoria
+
+
 const getCategoryPath = (node: WordNode | null): string => {
   if (!node) return '';
   let path = node.name;
@@ -29,7 +30,6 @@ const getCategoryPath = (node: WordNode | null): string => {
     path = `${currentNode.name}.${path}`;
     currentNode = currentNode.parent;
   }
-  console.log('Category path:', path); 
   return path;
 };
 
@@ -44,15 +44,11 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [nodeToRemove, setNodeToRemove] = useState<WordNode | null>(null);
 
-
-
   const openRemoveDialog = (node: WordNode) => {
-    setNodeToRemove(node); // Define o nó que será removido
-    setIsDialogOpen(true); // Abre o diálogo
+    setNodeToRemove(node); 
+    setIsDialogOpen(true); 
   };
 
-
-  // Função para confirmar a remoção
   const confirmRemove = () => {
     if (nodeToRemove) {
       onRemove(nodeToRemove);
@@ -60,24 +56,19 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
     }
   };
 
-   // Função para ativar a edição
-   const handleEdit = (node: WordNode) => {
-    console.log('Editing node:', node.name); // Verificar qual nó está sendo editado
+
+  const handleEdit = (node: WordNode) => {
     setEditingNode(node);
-    setEditedName(node.name); // Preenche com o nome original
+    setEditedName(node.name); 
   };
 
-  // Função para salvar a edição
   const handleSaveEdit = async (node: WordNode) => {
     if (!editedName.trim()) {
-      toast.error('Please enter a valid word.');
+      toast.error('Por favor, insira uma palavra válida.');
       return;
     }
 
     const categoryPath = getCategoryPath(selectedParent) || '';
-    console.log('Category path being sent:', categoryPath);
-    console.log('Old word:', node.name);
-    console.log('New word:', editedName);
 
     try {
       const response = await fetch('http://localhost:3001/words/edit', {
@@ -85,92 +76,100 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ oldWord: node.name, newWord: editedName, category: categoryPath }),
+        body: JSON.stringify({
+          oldWord: node.name,
+          newWord: editedName,
+          category: categoryPath
+        }),
       });
 
-      console.log('Server response status:', response.status);
-
-      // Verifique o status da resposta para garantir que seja 2xx
       if (response.ok) {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.indexOf('application/json') !== -1) {
-          const data = await response.json(); // Verifique se a resposta está em JSON
-          console.log('Server response data:', data);
-          node.name = editedName; // Atualiza o nome localmente
-          setEditingNode(null); // Encerra o modo de edição
-          toast.success('Word edited successfully!');
-        } else {
-          // Verifique se o tipo de conteúdo não é JSON, pode ser HTML
-          const responseText = await response.text();
-          console.error('Unexpected response format:', responseText);
-          toast.error('Failed to edit word. Server returned an invalid response.');
-        }
+        node.name = editedName; 
+        setEditingNode(null);  
+        toast.success('Palavra editada com sucesso!');
       } else {
-        // Erro com o status da resposta
-        const responseText = await response.text();
-        console.error('Server returned an error:', responseText);
-        toast.error('Failed to edit word. Server error occurred.');
+        try {
+          const responseText = await response.json();
+          console.error('Erro do servidor:', responseText);
+
+          if (responseText.error === 'A palavra já existe com o novo nome.') {
+            toast.error('Essa palavra já existe na categoria.');
+          } else if (responseText.error === 'A palavra não existe na categoria.') {
+            toast.error('A palavra não foi encontrada na categoria.');
+          } else {
+            toast.error('Erro ao editar a palavra. Ocorreu um erro no servidor.');
+          }
+        } catch (error) {
+          console.error('Falha ao interpretar a resposta do servidor:', error);
+          toast.error('Erro ao editar a palavra. O servidor retornou uma resposta inválida.');
+        }
       }
-    } catch (error) {
-      console.error('Error during edit:', error);
-      toast.error('An error occurred while editing the word.');
+    } catch  {
+      toast.error('Ocorreu um erro ao editar a palavra.');
     }
   };
 
-
-
-  // Renderização recursiva dos nós da árvore
   const renderNodes = (nodes: WordNode[], parent: WordNode | null = null) => {
     return nodes.map((node, index) => (
       <Disclosure key={index}>
         {({ open }) => (
           <div className="relative ml-4 my-2">
-            {/* Linha vertical conectando os itens */}
+            
             {parent && (
               <div className={`absolute top-0 left-0 w-0.5 bg-gray-300 dark:bg-gray-500 ${index === nodes.length - 1 ? 'h-1/2' : 'h-full'}`}></div>
             )}
 
             <div className="flex items-center justify-between pl-6">
-              {/* Linha horizontal conectando os itens */}
+              
               {parent && (
                 <div className="absolute top-1/2 left-0 w-6 h-0.5 bg-gray-300 dark:bg-gray-500"></div>
               )}
 
               {editingNode === node ? (
-                <>
-                  <Input
-                    type="text"
-                    value={editedName}
-                    onChange={(e) => setEditedName(e.target.value)}
-                    className="border border-gray-300 rounded px-2 py-1 text-gray-900"
-                  />
-                  <Button onClick={() => handleSaveEdit(node)} className="mx-4 bg-violet-600 text-white hover:bg-violet-700">
-                    <FaSave className="mr-2" /> Save
-                  </Button>
-                </>
+              <div className='flex flex-col md:flex-row w-full justify-between mr-4'>
+              <Input
+                type="text"
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
+                className="border border-gray-300 rounded px-2 py-1 text-gray-900 mb-2 md:mb-0 md:mr-4"
+              />
+              <Button 
+                onClick={() => handleSaveEdit(node)} 
+                className="mb-2 md:mb-0 md:mx-4 bg-violet-600 text-white hover:bg-violet-700"
+              >
+                <FaSave className="mr-2" /> Editar
+              </Button>
+              <Button 
+                onClick={() => setEditingNode(null)} 
+                className="border-2 bg-white text-gray-800 hover:bg-violet-200"
+              >
+                <FaTimes /> Cancelar
+              </Button>
+            </div>
+            
               ) : (
                 <div
                   className={`flex items-center gap-4 cursor-pointer hover:bg-blue-50 dark:hover:bg-indigo-600 transition-colors duration-200 px-2 py-1 rounded ${selectedParent === node ? 'bg-indigo-300 text-white' : ''}`}
                   onClick={() => onNodeClick(node)}
                 >
-                  <span className="text-lg text-gray-900  dark:text-gray-800">{node.name}</span>
-                  <Disclosure.Button className="ml-auto text-gray-900 dark:text-gray-800">{open ? '-' : '+'}</Disclosure.Button>
+                  <span className="text-lg text-gray-900  dark:text-gray-800 ">{node.name}</span>
+                  <Disclosure.Button className="ml-auto text-gray-900 dark:text-gray-800 ">{open ? '-' : '+'}</Disclosure.Button>
                 </div>
               )}
 
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent>
+                <DialogContent className='bg-slate-100 dark:bg-gray-400'>
                   <DialogHeader>
-                    <DialogTitle>Deletando...</DialogTitle>
-                    <DialogDescription>
-                    Tem certeza de que deseja remover esta palavra? Esta ação não pode ser desfeita.
+                    <DialogTitle className='text-xl dark:text-gray-800'>Deletando...</DialogTitle>
+                    <DialogDescription className='text-base text-gray-800'>
+                      Tem certeza de que deseja remover esta palavra? Está ação não pode ser desfeita.
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
-                    <Button variant="destructive" onClick={confirmRemove}>
+                    <Button className='hover:bg-red-800' variant="destructive" onClick={confirmRemove}>
                       Confirmar
                     </Button>
-                    <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>
+                    <Button className='bg-violet-50 border-2 dark:bg-gray-200 text-gray-900 dark:hover:bg-gray-300' variant="secondary" onClick={() => setIsDialogOpen(false)}>
                       Cancelar
                     </Button>
 
@@ -191,7 +190,7 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
                   leaveFrom="transform opacity-100 scale-100"
                   leaveTo="transform opacity-0 scale-95"
                 >
-                  <Menu.Items className="absolute right-0 mt-2 w-32 origin-top-right bg-white dark:bg-gray-700 divide-y divide-gray-100 dark:divide-gray-600 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <Menu.Items className="absolute right-0 mt-2 w-32 origin-top-right bg-white dark:bg-gray-500 divide-y divide-gray-100 dark:divide-violet-600 rounded-md shadow-lg ring-1 ring-violet-200 ring-opacity-5 focus:outline-none">
                     <div className="py-1">
                       <Menu.Item>
                         {({ active }) => (
@@ -199,7 +198,7 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
                             onClick={() => handleEdit(node)}
                             className={`${active ? 'bg-gray-100 dark:bg-gray-600' : ''} group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 w-full`}
                           >
-                            <FaEdit className="mr-2" /> Edit
+                            <FaEdit className="mr-2 text-yellow-600" /> Editar
                           </button>
                         )}
                       </Menu.Item>
@@ -207,27 +206,22 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
                       <Menu.Item>
                         {({ active }) => (
                           <button
-                            onClick={() => openRemoveDialog(node)} // Abre o diálogo em vez de remover diretamente
+                            onClick={() => openRemoveDialog(node)} 
                             className={`${active ? 'bg-gray-100 dark:bg-gray-600' : ''} group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 w-full`}
                           >
-                            <FaTrash className="mr-2" /> Remove
+                            <FaTrash className="mr-2 text-red-600" /> Excluir
                           </button>
                         )}
                       </Menu.Item>
-
-
-
-
-
                     </div>
                   </Menu.Items>
                 </Transition>
               </Menu>
             </div>
 
-            <Disclosure.Panel className="pl-6">
+            <Disclosure.Panel className="pl-6 ">
               {node.children.length > 0 && (
-                <ul className="pl-4">
+                <ul className="pl-4 ">
                   {renderNodes(node.children, node)}
                 </ul>
               )}

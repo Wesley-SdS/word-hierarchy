@@ -10,9 +10,9 @@ interface SaveButtonProps {
 }
 
 const SaveButton = ({ hierarchy }: SaveButtonProps) => {
-  // Função para converter a árvore (que está no formato de array) para o formato de objeto original
-  const convertArrayToObject = (nodes: WordNode[]): Record<string, any> => {
-    const result: Record<string, any> = {};
+  
+  const convertArrayToObject = (nodes: WordNode[]): Record<string, unknown> => {
+    const result: Record<string, unknown> = {};
     nodes.forEach((node) => {
       if (node.children && node.children.length > 0) {
         result[node.name] = convertArrayToObject(node.children);
@@ -23,21 +23,22 @@ const SaveButton = ({ hierarchy }: SaveButtonProps) => {
     return result;
   };
 
+
   const saveHierarchyToFile = () => {
-    const hierarchyObject = convertArrayToObject(hierarchy); // Converte para o formato de objeto
-    const dataStr = JSON.stringify(hierarchyObject, null, 2); // Converte o objeto para JSON formatado
-    const blob = new Blob([dataStr], { type: 'application/json' }); // Cria um arquivo JSON
-    const url = URL.createObjectURL(blob); // Cria um link para o arquivo
-    const link = document.createElement('a'); // Cria um elemento de link
+    const hierarchyObject = convertArrayToObject(hierarchy); 
+    const dataStr = JSON.stringify(hierarchyObject, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' }); 
+    const url = URL.createObjectURL(blob); 
+    const link = document.createElement('a'); 
     link.href = url;
-    link.download = 'hierarchy.json'; // Define o nome do arquivo para download
-    link.click(); // Simula o clique para baixar o arquivo
+    link.download = 'hierarchy.json'; 
+    link.click(); 
   };
 
   return (
     <div className="flex gap-4">
       <Button
-        onClick={saveHierarchyToFile} // Faz o download diretamente ao clicar
+        onClick={saveHierarchyToFile} 
         className="bg-violet-600 hover:bg-violet-700 text-white rounded px-4 py-2 mt-4"
       >
         Download JSON
