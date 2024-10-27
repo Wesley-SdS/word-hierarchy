@@ -5,9 +5,9 @@ import Image from 'next/image'; // Usando o componente Image do Next.js
 
 const Documentation: React.FC = () => {
     const images = [
-        '/img1.png',
-        '/img2.png',
-        '/img3.png',
+        '/page.png',
+        '/page2.png',
+        '/page.png',
     ];
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
