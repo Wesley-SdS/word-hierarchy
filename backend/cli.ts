@@ -4,7 +4,7 @@ import * as path from 'path';
 
 const loadHierarchy = () => {
   const startLoadTime = Date.now();
-  const filePath = path.resolve(process.cwd(), 'dicts', 'hierarchy.json');
+  const filePath = process.env.HIERARCHY_PATH || path.resolve(process.cwd(), 'backend', 'dicts', 'hierarchy.json');
 
   const data = fs.readFileSync(filePath, 'utf-8');
   const hierarchy = JSON.parse(data);
