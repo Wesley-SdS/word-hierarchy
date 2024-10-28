@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import SearchBar from './SearchBar';
 import SaveButton from './SaveButton';
 import HierarchyTree from './HierarchyTree';
+
 import {
     Dialog,
     DialogContent,
@@ -83,23 +84,23 @@ const filterHierarchy = (nodes: WordNode[], query: string): WordNode[] => {
     }, []);
 };
 
-    const addChildToParent = (nodes: WordNode[], parentName: string, child: WordNode): WordNode[] => {
-        return nodes.map((node) => {
-            if (normalizeString(node.name) === normalizeString(parentName)) {
-                return {
-                    ...node,
-                    children: [...node.children, child],
-                };
-            } else if (node.children.length > 0) {
-                return {
-                    ...node,
-                    children: addChildToParent(node.children, parentName, child),
-                };
-            } else {
-                return node;
-            }
-        });
-    };
+const addChildToParent = (nodes: WordNode[], parentName: string, child: WordNode): WordNode[] => {
+    return nodes.map((node) => {
+        if (normalizeString(node.name) === normalizeString(parentName)) {
+            return {
+                ...node,
+                children: [...node.children, child],
+            };
+        } else if (node.children.length > 0) {
+            return {
+                ...node,
+                children: addChildToParent(node.children, parentName, child),
+            };
+        } else {
+            return node;
+        }
+    });
+};
 
 
 
@@ -143,7 +144,7 @@ const HierarchyBuilder: React.FC = () => {
     };
 
     const addWord = async () => {
- 
+
         if (!newWord.trim()) {
             toast.error('Por favor, insira uma palavra.');
             return;
@@ -154,7 +155,7 @@ const HierarchyBuilder: React.FC = () => {
             return;
         }
 
-          const exists = wordExistsInHierarchy(hierarchy, newWord);
+        const exists = wordExistsInHierarchy(hierarchy, newWord);
         if (exists) {
             toast.error('Essa palavra já existe na hierarquia.');
             return;
@@ -172,7 +173,7 @@ const HierarchyBuilder: React.FC = () => {
                 category: categoryPath || 'root',
                 newWord: normalizeString(newWord),
             };
-            
+
 
 
             const response = await fetch('http://localhost:3001/words/add', {
@@ -196,12 +197,12 @@ const HierarchyBuilder: React.FC = () => {
             }
         } catch {
             toast.error('Erro ao adicionar a palavra.');
-            
+
         }
 
         setNewWord('');
         setSelectedParent(null);
-    }; 
+    };
 
 
     const renderOptions = (nodes: WordNode[]): JSX.Element[] => {
@@ -214,13 +215,13 @@ const HierarchyBuilder: React.FC = () => {
     };
 
     const handleRemoveNode = (nodeToRemove: WordNode) => {
-   
+
         const removeNodeFromHierarchy = (nodes: WordNode[], nodeToRemove: WordNode): WordNode[] => {
             return nodes
-                .filter(node => node !== nodeToRemove) 
+                .filter(node => node !== nodeToRemove)
                 .map(node => ({
                     ...node,
-                    children: removeNodeFromHierarchy(node.children, nodeToRemove), 
+                    children: removeNodeFromHierarchy(node.children, nodeToRemove),
                 }));
         };
 
@@ -248,7 +249,7 @@ const HierarchyBuilder: React.FC = () => {
             })
             .catch(() => {
                 toast.error('Erro ao excluir a palavra.');
-              });
+            });
     };
 
     return (
@@ -263,7 +264,9 @@ const HierarchyBuilder: React.FC = () => {
                     onChange={(e) => setNewWord(e.target.value)}
                     className="border border-gray-300 rounded px-4 py-2 flex-grow mr-2 bg-white text-gray-800 dark:text-gray-800 dark:border-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-800"
                 />
+                <label htmlFor="categorySelect" className="sr-only">Selecione uma Categoria</label>
                 <select
+                    id="categorySelect"
                     onChange={(e) => {
                         const selectedPath = e.target.value;
                         const findNodeByPath = (nodes: WordNode[], path: string): WordNode | null => {
@@ -283,10 +286,11 @@ const HierarchyBuilder: React.FC = () => {
                     <option value="">Selecione uma Categoria</option>
                     {renderOptions(hierarchy)}
                 </select>
-                <Button onClick={addWord} className="flex items-center bg-violet-600 text-white rounded px-4 py-2 hover:bg-violet-700 transition-colors">
+
+                <Button onClick={addWord} aria-label='Salvar' className="flex items-center bg-violet-600 text-white rounded px-4 py-2 hover:bg-violet-700 transition-colors">
                     <FaPlus className="mr-2" /> Salvar
                 </Button>
-               
+
             </div>
             {selectedParent && <p className="mt-4 text-lg text-gray-700">Categoria Selecionada: <strong>{selectedParent.name}</strong></p>}
             <HierarchyTree
@@ -300,7 +304,7 @@ const HierarchyBuilder: React.FC = () => {
 
             <Dialog open={!!nodeToRemove} onOpenChange={() => setNodeToRemove(null)}>
                 <DialogTrigger asChild>
-                    <button className="hidden" />
+                    <button aria-label='menu' className="hidden" />
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
@@ -310,10 +314,10 @@ const HierarchyBuilder: React.FC = () => {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex justify-end">
-                        <Button className="bg-red-500 text-white rounded px-4 py-2 mr-2 hover:bg-red-600 transition-colors">
+                        <Button aria-label='Confirmar' className="bg-red-500 text-white rounded px-4 py-2 mr-2 hover:bg-red-600 transition-colors">
                             Confirmar
                         </Button>
-                        <Button onClick={() => setNodeToRemove(null)} className="bg-white text-black border-2 border-gray-100 rounded px-4 py-2 hover:bg-gray-100 transition-colors">
+                        <Button aria-label='Cancelar' onClick={() => setNodeToRemove(null)} className="bg-white text-black border-2 border-gray-100 rounded px-4 py-2 hover:bg-gray-100 transition-colors">
                             Cancelar
                         </Button>
                     </div>

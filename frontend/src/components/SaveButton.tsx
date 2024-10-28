@@ -38,6 +38,7 @@ const SaveButton = ({ hierarchy }: SaveButtonProps) => {
   return (
     <div className="flex gap-4">
       <Button
+      aria-label="Download Json"
         onClick={saveHierarchyToFile} 
         className="bg-violet-600 hover:bg-violet-700 text-white rounded px-4 py-2 mt-4"
       >

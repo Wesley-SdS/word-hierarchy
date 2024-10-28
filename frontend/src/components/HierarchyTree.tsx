@@ -134,12 +134,14 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
                 className="border border-gray-300 rounded px-2 py-1 text-gray-900 mb-2 md:mb-0 md:mr-4"
               />
               <Button 
+              aria-label='Editar'
                 onClick={() => handleSaveEdit(node)} 
                 className="mb-2 md:mb-0 md:mx-4 bg-violet-600 text-white hover:bg-violet-700"
               >
                 <FaSave className="mr-2" /> Editar
               </Button>
               <Button 
+              aria-label='cancelar'
                 onClick={() => setEditingNode(null)} 
                 className="border-2 bg-white text-gray-800 hover:bg-violet-200"
               >
@@ -153,7 +155,7 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
                   onClick={() => onNodeClick(node)}
                 >
                   <span className="text-lg text-gray-900  dark:text-gray-800 ">{node.name}</span>
-                  <Disclosure.Button className="ml-auto text-gray-900 dark:text-gray-800 ">{open ? '-' : '+'}</Disclosure.Button>
+                  <Disclosure.Button aria-label='- ou +' className="ml-auto text-gray-900 dark:text-gray-800 ">{open ? '-' : '+'}</Disclosure.Button>
                 </div>
               )}
 
@@ -166,10 +168,10 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
-                    <Button className='hover:bg-red-800' variant="destructive" onClick={confirmRemove}>
+                    <Button aria-label='Confirmar' className='hover:bg-red-800' variant="destructive" onClick={confirmRemove}>
                       Confirmar
                     </Button>
-                    <Button className='bg-violet-50 border-2 dark:bg-gray-200 text-gray-900 dark:hover:bg-gray-300' variant="secondary" onClick={() => setIsDialogOpen(false)}>
+                    <Button aria-label='Cancelar' className='bg-violet-50 border-2 dark:bg-gray-200 text-gray-900 dark:hover:bg-gray-300' variant="secondary" onClick={() => setIsDialogOpen(false)}>
                       Cancelar
                     </Button>
 
@@ -195,6 +197,7 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
                       <Menu.Item>
                         {({ active }) => (
                           <button
+                          aria-label='Editar'
                             onClick={() => handleEdit(node)}
                             className={`${active ? 'bg-gray-100 dark:bg-gray-600' : ''} group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 w-full`}
                           >
@@ -206,6 +209,7 @@ const HierarchyTree: React.FC<HierarchyTreeProps> = ({
                       <Menu.Item>
                         {({ active }) => (
                           <button
+                          aria-label='Excluir'
                             onClick={() => openRemoveDialog(node)} 
                             className={`${active ? 'bg-gray-100 dark:bg-gray-600' : ''} group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 w-full`}
                           >

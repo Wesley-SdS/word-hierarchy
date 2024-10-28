@@ -9,14 +9,14 @@ const Footer: React.FC = () => {
 
         {/* Interactive Menu */}
         <nav className="flex space-x-8 mb-4">
-          <Link href="/" className="group flex items-center space-x-2 text-gray-400 hover:text-white dark:text-gray-400 dark:hover:text-white transition-transform duration-300">
+          <Link aria-label='Home' href="/" className="group flex items-center space-x-2 text-gray-400 hover:text-white dark:text-gray-400 dark:hover:text-white transition-transform duration-300">
             <FaHome size={20} />
             <span className="relative">
               Home
               <span className="absolute left-0 bottom-0 w-full h-0.5 bg-violet-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
             </span>
           </Link>
-          <Link href="/documentation" className="group flex items-center space-x-2 text-gray-400 hover:text-white dark:text-gray-400 dark:hover:text-white transition-transform duration-300">
+          <Link aria-label='Documentation' href="/documentation" className="group flex items-center space-x-2 text-gray-400 hover:text-white dark:text-gray-400 dark:hover:text-white transition-transform duration-300">
             <FaFileAlt size={20} />
             <span className="relative">
               Documentation

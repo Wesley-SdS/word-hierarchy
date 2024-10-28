@@ -207,7 +207,7 @@ const Documentation: React.FC = () => {
                             },
                             {
                                 title: '11. Melhorias na Normalização',
-                                description: 'Melhoraria a normalização para que o visual fique mais natural, permitindo acentos, espaços e letras maiúsculas.',
+                                description: 'Melhoraria a normalização para que o visual fique mais natural, permitindo acentos, espaços e letras maiúsculas.const filePath',
                             },
                         ].map((improvement, index) => (
                             <Transition
@@ -242,6 +242,7 @@ const Documentation: React.FC = () => {
                             <button
                                 className="absolute top-0 right-0 m-4 text-white text-3xl focus:outline-none"
                                 onClick={() => setSelectedImage(null)}
+                                aria-label='times'
                             >
                                 &times;
                             </button>

@@ -4,7 +4,8 @@ import * as path from 'path';
 
 const loadHierarchy = () => {
   const startLoadTime = Date.now();
-  const filePath = path.join(__dirname, 'dicts', 'hierarchy.json');
+  const filePath = path.resolve(process.cwd(), 'dicts', 'hierarchy.json');
+
   const data = fs.readFileSync(filePath, 'utf-8');
   const hierarchy = JSON.parse(data);
   const endLoadTime = Date.now();
@@ -122,3 +123,4 @@ const main = () => {
 if (require.main === module) {
   main();
 };
+export { analyzePhrase };
